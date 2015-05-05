@@ -1,0 +1,9 @@
+<ul>
+<?php foreach ($this->container as $page): ?>
+	<li>
+		<a <?=$page->active?"class='active'":""?> href="<?=$page->href?>">
+			<?=$page->label?>
+		</a>
+	</li>
+<?php endforeach; ?>
+</ul>
