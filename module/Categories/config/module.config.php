@@ -30,6 +30,21 @@ return array(
                             ),
                         ),
                     ),
+					'expense'=>array(
+						'type'    => 'Segment',
+                        'options' => array(
+                            'route'    => '/expense[/:action][/:id]',
+                            'constraints' => array(
+                                'action'     => '[a-zA-Z][a-zA-Z0-9_-]*',
+								'id'     => '[0-9]+',
+                            ),
+                            'defaults' => array(
+								'__NAMESPACE__' => 'Categories\Controller',
+								'controller'    => 'Expense',
+								'action'        => 'index',
+                            ),
+                        ),
+					)
                 ),
 				
             ),
