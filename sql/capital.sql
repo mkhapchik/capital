@@ -1,7 +1,7 @@
 ﻿--
 -- Скрипт сгенерирован Devart dbForge Studio for MySQL, Версия 6.3.341.0
 -- Домашняя страница продукта: http://www.devart.com/ru/dbforge/mysql/studio
--- Дата скрипта: 06.05.2015 16:46:32
+-- Дата скрипта: 08.05.2015 16:31:43
 -- Версия сервера: 5.5.23
 -- Версия клиента: 4.1
 --
@@ -190,7 +190,7 @@ $$
 --
 -- Описание для процедуры getOverflow
 --
-CREATE PROCEDURE getOverflow(IN p_date DATE)
+CREATE PROCEDURE getOverflow(IN p_date date, IN p_category_type INT)
   SQL SECURITY INVOKER
   COMMENT 'Переполнение за указанный месяц'
 BEGIN
@@ -204,11 +204,19 @@ BEGIN
   SET v_date_from = DATE_FORMAT(p_date ,'%Y-%m-01 00.00.00');
   SET v_date_to = LAST_DAY(p_date);
 
-  SELECT t.categories_id, c.name, c.amount_limit, SUM(t.amount), c.amount_limit-SUM(t.amount) AS overflow
-  FROM categories c 
-  INNER JOIN transactions t ON c.id=t.categories_id 
-  WHERE t.date>=DATE_FORMAT(p_date ,'%Y-%m-01 00.00.00') AND t.date<LAST_DAY(p_date)
-  GROUP BY c.id;
+  IF p_category_type IS NULL THEN
+    SELECT t.categories_id, c.name, c.amount_limit, SUM(t.amount*t.op_sign) AS sum, ABS(SUM(t.amount*t.op_sign))-c.amount_limit AS overflow
+    FROM categories c 
+    INNER JOIN transactions t ON c.id=t.categories_id 
+    WHERE t.date>=DATE_FORMAT(p_date ,'%Y-%m-01 00.00.00') AND t.date<LAST_DAY(p_date)
+    GROUP BY c.id;
+  ELSE
+    SELECT t.categories_id, c.name, c.amount_limit, SUM(t.amount*t.op_sign) AS sum, ABS(SUM(t.amount*t.op_sign))-c.amount_limit AS overflow
+    FROM categories c 
+    INNER JOIN transactions t ON c.id=t.categories_id 
+    WHERE t.date>=DATE_FORMAT(p_date ,'%Y-%m-01 00.00.00') AND t.date<LAST_DAY(p_date) AND c.type=p_category_type
+    GROUP BY c.id;
+END IF;
 
 
 END
