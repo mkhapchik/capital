@@ -1,1 +1,23 @@
-<?=$test?>
+<table>
+<tr>
+	<th>Категория</th>
+	<th>Тип</th>
+	<th>Статистика</th>
+	<th>Лимит</th>
+	<th>Сумма за месяц</th>
+	<th>Переполнение</th>
+	<th>Id</th>
+</tr>
+<?php foreach($categories as $category): ?>
+<tr>
+	<td><?=$category->name ?></td>
+	<td><?=$category->type ?></td>
+	<td><?=$category->statistic ?></td>
+	<td><?=$category->amount_limit ?></td>
+	<td><?=$category->sum ?></td>
+	<td><?=$category->overflow ?></td>
+	<td><?=$category->id ?></td>
+</tr>
+
+<?php endforeach;?>
+</table>

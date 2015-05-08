@@ -13,14 +13,14 @@ class AccountTable
  
     public function fetchAll()
     {
-        $resultSet = $this->tableGateway->select();
+        $resultSet = $this->tableGateway->select(array('f_deleted'=>0));
         return $resultSet;
     }
  
     public function getAccount($id)
     {
         $id  = (int) $id;
-        $rowset = $this->tableGateway->select(array('id' => $id));
+        $rowset = $this->tableGateway->select(array('id' => $id, 'f_deleted'=>0));
         $row = $rowset->current();
         if (!$row) {
             throw new \Exception("Could not find row $id");
@@ -34,7 +34,8 @@ class AccountTable
 		$data = array(
             'name' => $account->name,
             'comments'  => $account->comments,
-			'amount' =>  $account->amount
+			'amount' =>  $account->amount,
+			'f_deleted'=>0
         );
  
         $id = (int)$account->id;
@@ -51,6 +52,7 @@ class AccountTable
  
     public function deleteAccount($id)
     {
-        $this->tableGateway->delete(array('id' => $id));
+        //$this->tableGateway->delete(array('id' => $id));
+		$this->tableGateway->update(array('f_deleted'=>1), array('id' => $id));
     }
 }

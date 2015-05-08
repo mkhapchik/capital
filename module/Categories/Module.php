@@ -1,6 +1,8 @@
 <?php
 namespace Categories;
 
+use Categories\Model\CategoryTable;
+
 class Module
 {
     public function getConfig()
@@ -18,4 +20,16 @@ class Module
             ),
         );
     }
+	
+	public function getServiceConfig()
+	{
+		return array(
+			'factories' => array(
+				'CategoryTable' => function ($sm) {
+					$categoryTable =  new CategoryTable();
+					return $categoryTable;
+				}
+			),
+		);
+	}
 }
