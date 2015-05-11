@@ -20,7 +20,15 @@ class MyNavigation extends DefaultNavigationFactory
                 $configuration['navigation'][$this->getName()][$row['name']] = array(
                     'label' => $row['label'],
                     'route' => $row['route'],
-                );
+					'pages'      => array(
+						array(
+							'label'      => 'Foo Server',
+							'module'     => 'application',
+							'controller' => 'index',
+							'action'     => 'index',
+						)
+					)
+                )  ;
             }
             
             if (!isset($configuration['navigation'])) throw new Exception\InvalidArgumentException('Could not find navigation configuration key');
@@ -46,7 +54,7 @@ class MyNavigation extends DefaultNavigationFactory
 		/*
 		 $navigation = array();
 
-        if (null === $this->pages) {
+        
            
 			
 			$navigation[] = array(
@@ -54,8 +62,7 @@ class MyNavigation extends DefaultNavigationFactory
 				'module'     => 'application',
 				'controller' => 'index',
 				'action'     => 'index',
-				'uri'=> '/qwe'
-				
+				'uri'=> '/qwe',
 				'pages'      => array(
 					array(
 						'label'      => 'Foo Server',
@@ -83,7 +90,7 @@ class MyNavigation extends DefaultNavigationFactory
                 $routeMatch,
                 $router
             );
-        }
+        
 
         return $this->pages;
 		*/
