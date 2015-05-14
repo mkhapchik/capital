@@ -1,7 +1,7 @@
 ﻿--
 -- Скрипт сгенерирован Devart dbForge Studio for MySQL, Версия 6.3.341.0
 -- Домашняя страница продукта: http://www.devart.com/ru/dbforge/mysql/studio
--- Дата скрипта: 08.05.2015 16:31:43
+-- Дата скрипта: 14.05.2015 16:58:44
 -- Версия сервера: 5.5.23
 -- Версия клиента: 4.1
 --
@@ -34,7 +34,7 @@ CREATE TABLE account (
   PRIMARY KEY (id)
 )
 ENGINE = INNODB
-AUTO_INCREMENT = 2
+AUTO_INCREMENT = 3
 AVG_ROW_LENGTH = 16384
 CHARACTER SET utf8
 COLLATE utf8_general_ci
@@ -49,11 +49,12 @@ CREATE TABLE categories (
   type BIGINT(20) NOT NULL COMMENT 'Тип 1 - доход, 0 - расход',
   statistic BIGINT(20) DEFAULT NULL COMMENT 'Статистика употребления в процентах',
   amount_limit DECIMAL(8, 0) DEFAULT NULL COMMENT 'Лимит в месяц',
+  f_deleted INT(11) NOT NULL DEFAULT 0 COMMENT 'Флаг удаления 1 -удален 0 - не удален',
   PRIMARY KEY (id)
 )
 ENGINE = INNODB
-AUTO_INCREMENT = 6
-AVG_ROW_LENGTH = 4096
+AUTO_INCREMENT = 11
+AVG_ROW_LENGTH = 1820
 CHARACTER SET cp1251
 COLLATE cp1251_general_ci
 COMMENT = 'Категории расхода и дохода';
@@ -149,7 +150,7 @@ COMMENT = 'Планируемые покупки';
 CREATE TABLE transactions (
   id BIGINT(20) NOT NULL AUTO_INCREMENT,
   date DATE NOT NULL COMMENT 'дата операции',
-  amount DECIMAL(8, 2) DEFAULT NULL COMMENT 'сумма операции',
+  amount DECIMAL(8, 2) NOT NULL DEFAULT 0.00 COMMENT 'сумма операции',
   categories_id BIGINT(20) DEFAULT NULL COMMENT 'id категории',
   account_id BIGINT(20) DEFAULT NULL COMMENT 'id счета',
   comment VARCHAR(500) DEFAULT NULL COMMENT 'комментрарий',
@@ -205,17 +206,19 @@ BEGIN
   SET v_date_to = LAST_DAY(p_date);
 
   IF p_category_type IS NULL THEN
-    SELECT t.categories_id, c.name, c.amount_limit, SUM(t.amount*t.op_sign) AS sum, ABS(SUM(t.amount*t.op_sign))-c.amount_limit AS overflow
+    SELECT c.id, c.type, c.statistic, c.name, c.amount_limit, ABS(SUM(t.amount*t.op_sign)) AS sum, ABS(SUM(t.amount*t.op_sign))-c.amount_limit AS overflow
     FROM categories c 
-    INNER JOIN transactions t ON c.id=t.categories_id 
-    WHERE t.date>=DATE_FORMAT(p_date ,'%Y-%m-01 00.00.00') AND t.date<LAST_DAY(p_date)
-    GROUP BY c.id;
+    LEFT JOIN transactions t ON c.id=t.categories_id 
+    WHERE ((t.date>=DATE_FORMAT(p_date ,'%Y-%m-01 00.00.00') AND t.date<LAST_DAY(p_date)) OR t.date IS NULL)  AND c.f_deleted=0
+    GROUP BY c.id
+    ORDER BY c.statistic DESC;
   ELSE
-    SELECT t.categories_id, c.name, c.amount_limit, SUM(t.amount*t.op_sign) AS sum, ABS(SUM(t.amount*t.op_sign))-c.amount_limit AS overflow
+    SELECT c.id, c.type, c.statistic, c.name, c.amount_limit, ABS(SUM(t.amount*t.op_sign)) AS sum, ABS(SUM(t.amount*t.op_sign))-c.amount_limit AS overflow
     FROM categories c 
-    INNER JOIN transactions t ON c.id=t.categories_id 
-    WHERE t.date>=DATE_FORMAT(p_date ,'%Y-%m-01 00.00.00') AND t.date<LAST_DAY(p_date) AND c.type=p_category_type
-    GROUP BY c.id;
+    LEFT JOIN transactions t ON c.id=t.categories_id 
+    WHERE ((t.date>=DATE_FORMAT(p_date ,'%Y-%m-01 00.00.00') AND t.date<LAST_DAY(p_date)) OR t.date IS NULL) AND c.type=p_category_type AND c.f_deleted=0
+    GROUP BY c.id
+    ORDER BY c.statistic DESC;
 END IF;
 
 
@@ -312,16 +315,22 @@ DELIMITER ;
 -- Вывод данных для таблицы account
 --
 INSERT INTO account VALUES
-(1, 'Наличные', -1301.00, 'Тестовый счет', 0);
+(1, 'Наличные', -1301.00, 'Тестовый счет', 0),
+(2, 'Карта', 300.00, 'Карта для накопления на яхту', 0);
 
 -- 
 -- Вывод данных для таблицы categories
 --
 INSERT INTO categories VALUES
-(1, 'Категория дохода', 1, 80, NULL),
-(2, 'Категория расхода', 0, 29, 500),
-(4, 'Категория расхода 2', 0, 71, 7000),
-(5, 'Категория дохода 2', 1, 20, NULL);
+(1, 'Категория дохода', 1, 80, NULL, 0),
+(2, 'Категория расхода', 0, 29, 500, 0),
+(4, 'Категория расхода 2', 0, 71, 8000, 0),
+(5, 'Категория дохода 2', 1, 20, NULL, 0),
+(6, 'еуые', 1, 0, 0, 1),
+(7, 'test', 1, 0, 0, 1),
+(8, 'test3333333', 1, NULL, NULL, 1),
+(9, 'test2', 1, 0, 0, 1),
+(10, 'test', 1, NULL, NULL, 1);
 
 -- 
 -- Вывод данных для таблицы menu
