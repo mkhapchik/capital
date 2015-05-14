@@ -42,6 +42,7 @@ class Category
 		$this->type     = (isset($data['type'])) ? $data['type'] : null;
 		$this->statistic     = (isset($data['statistic'])) ? $data['statistic'] : null;
 		$this->amount_limit     = (isset($data['amount_limit'])) ? $data['amount_limit'] : null;
+		$this->sum     = (isset($data['sum'])) ? $data['sum'] : null;
 		$this->overflow     = (isset($data['overflow'])) ? $data['overflow'] : null;
     }
 	

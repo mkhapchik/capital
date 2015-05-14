@@ -1,23 +1,35 @@
-<table>
-<tr>
-	<th>Категория</th>
-	<th>Тип</th>
-	<th>Статистика</th>
-	<th>Лимит</th>
-	<th>Сумма за месяц</th>
-	<th>Переполнение</th>
-	<th>Id</th>
-</tr>
-<?php foreach($categories as $category): ?>
-<tr>
-	<td><?=$category->name ?></td>
-	<td><?=$category->type ?></td>
-	<td><?=$category->statistic ?></td>
-	<td><?=$category->amount_limit ?></td>
-	<td><?=$category->sum ?></td>
-	<td><?=$category->overflow ?></td>
-	<td><?=$category->id ?></td>
-</tr>
+<section class="block">
+	<header class="head"><h1>Диаграмма доходов</h1></header>
+	<div class="body">
+		$category['statistic']
+		по категориям
+	</div>
+</section>
 
-<?php endforeach;?>
-</table>
+<section class="block">
+	<header class="head"><h1>Категории дохода</h1><a class="button" href="/categories/income/add"><span class="ui-icon ui-icon-plusthick"></span></a></header>
+	<div class="body">
+		<table>
+		<tr>
+			<th>Категория</th>
+			<th>Приход за месяц</th>
+			<th></th>
+		</tr>
+		<?php foreach($categories as $category): 
+	
+		?>
+		<tr>
+			<td><?=$category['name'] ?></td>
+			<td><?=$category['sum'] ?> <span class="rub">Р</span></td>
+			<td>
+			<div class="nav">
+				<a class="button edit" href="/categories/income/edit/<?=$category['id']?>"><span class="ui-icon ui-icon-pencil">редактировать</span></a> 
+				<a class="button del" href="/categories/income/del/<?=$category['id']?>"><span class="ui-icon ui-icon-trash">удалить</span></a>
+			</div>
+			</td>
+		</tr>
+
+		<?php endforeach;?>
+		</table>
+	</div>
+</section>

@@ -20,6 +20,7 @@ class MyNavigation extends DefaultNavigationFactory
                 $configuration['navigation'][$this->getName()][$row['name']] = array(
                     'label' => $row['label'],
                     'route' => $row['route'],
+					/*
 					'pages'      => array(
 						array(
 							'label'      => 'Foo Server',
@@ -28,6 +29,7 @@ class MyNavigation extends DefaultNavigationFactory
 							'action'     => 'index',
 						)
 					)
+					*/
                 )  ;
             }
             

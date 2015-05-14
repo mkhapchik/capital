@@ -84,10 +84,17 @@ footer{
 	border-bottom: 1px solid #d7d9db;
 	text-align:center;
 	padding:10px;
+	position:relative;
 }
 
 .block .head h1{
+	
+}
 
+.block .head .button{
+	position:absolute;
+	right:10px;
+	top:8px;
 }
 
 .block .body{
@@ -95,9 +102,45 @@ footer{
 	/*float:left;*/
 }
 
+.block .body table{
+	width:100%;
+}
+
+.block .body table tr{
+
+}
+
+.block .body table tr:nth-child(2n+1){
+	background: #f4f4f4;
+}
+
+.block .body table tr:first-child{
+	background: #EAECEE;
+}
+
+.block .body table th{
+	text-align:center;
+	padding: 20px 20px;
+	vertical-align:middle;
+}
+
+.block .body table td{
+	padding: 20px 20px;
+	vertical-align:middle;
+}
+
+
 .rub{
 	display: inline-block;
 	width:0.45em;
 	line-height:0.3em;
 	border-bottom: 1px solid;
+}
+
+.error{
+	color:#cd0a0a;
+}
+
+.success{
+	color:#2E83FF;
 }

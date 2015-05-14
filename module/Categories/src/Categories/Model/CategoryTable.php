@@ -23,70 +23,59 @@ class CategoryTable extends AbstractTableGateway implements AdapterAwareInterfac
     {
         $this->adapter = $adapter;
         $this->resultSetPrototype = new HydratingResultSet();
-		
-        $this->initialize();
+		$this->initialize();
     }
  
     public function fetchAll()
     {
-		
-		//$r = $this->adapter->query("CALL getOverflow('2015-03-01', null);", Adapter::QUERY_MODE_EXECUTE);
-		//$r = $this->adapter->query("SELECT * FROM categories", Adapter::QUERY_MODE_EXECUTE);
-		
-		$query = "SELECT t.categories_id, c.name, c.amount_limit, SUM(t.amount*t.op_sign) AS sum, ABS(SUM(t.amount*t.op_sign))-c.amount_limit AS overflow
-		FROM categories c 
-		INNER JOIN transactions t ON c.id=t.categories_id 
-		WHERE t.date >=DATE_FORMAT('2015-03-01' ,'%Y-%m-01 00.00.00') AND t.date < LAST_DAY('2015-03-01')
-		GROUP BY c.id;";
-		
-		
+		$query = "CALL getOverflow('2015-03-01', {$this->type})";
 		$r = $this->adapter->query($query, Adapter::QUERY_MODE_EXECUTE);
-		$this->adapter->closeCursor();		
-		$result = $r->setArrayObjectPrototype(new Category());
-	
+		
+		$result = $r->toArray();
+			
 		return $result;
 	}
  
-   
- 
     public function getCategory($id)
     {
-        /*
 		$id  = (int) $id;
-        $rowset = $this->tableGateway->select(array('id' => $id));
+        $rowset = $this->select(array('id' => $id, 'type' => $this->type));
         $row = $rowset->current();
         if (!$row) {
             throw new \Exception("Could not find row $id");
         }
         return $row;
-		*/
     }
  
     public function saveCategory(Category $category)
     {
-		/*
 		$data = array(
-            'name' => $account->name,
-            'comments'  => $account->comments,
-			'amount' =>  $account->amount
+			'name' => $category->name,
+			'type' => $this->type,
+			'statistic' => $category->statistic,
+			'amount_limit' => $category->amount_limit,
+			'f_deleted'=>0
         );
- 
-        $id = (int)$account->id;
-        if ($id == 0) 
+
+        $id = (int)$category->id;
+		
+		if ($id == 0) 
 		{
-            $this->tableGateway->insert($data);
+			$this->insert($data);
         } 
 		else 
 		{
-            if ($this->getAccount($id)) $this->tableGateway->update($data, array('id' => $id));
+            if ($this->getCategory($id)) $this->update($data, array('id' => $id));
 			else  throw new \Exception('Form id does not exist');
         }
-		*/
+		
     }
  
     public function deleteCategory($id)
     {
-        //$this->tableGateway->delete(array('id' => $id));
+        $id = (int)$id;
+		$this->update(array('f_deleted'=>1), array('id' => $id, 'type'=>$this->type));
+		//$this->tableGateway->delete(array('id' => $id));
     }
 	
 	public function setType($type)

@@ -1,0 +1,57 @@
+<style>
+	.block .body table tr.overflow{
+		background: #ffc9c9;
+	}
+</style>
+
+<section class="block">
+	<header class="head"><h1>Диаграмма расходов</h1></header>
+	<div class="body">
+		$category['statistic']
+		по категориям
+	</div>
+</section>
+
+<section class="block">
+	<header class="head"><h1>Категории расхода</h1> <a class="button" title="Добавить новую категорию расхода" href="/categories/expense/add"><span class="ui-icon ui-icon-plusthick"></span></a></header>
+	<div class="body">
+		<table>
+		<tr>
+			<th>Категория</th>
+			<th>Лимит</th>
+			<th>Расход за месяц</th>
+			<th>Остаток</th>
+			<th></th>
+		</tr>
+		<?php foreach($categories as $category): 
+		$class = $category['overflow'] > 0? 'overflow': 'balance';
+		?>
+		<tr class="<?=$class?>">
+			<td><?=$category['name'] ?></td>
+			
+			<td><?=$category['amount_limit'] ?> <span class="rub">Р</span></td>
+			<td><?=$category['sum'] ?> <span class="rub">Р</span></td>
+			<td><?=-$category['overflow'] ?> <span class="rub">Р</span></td>
+			<td>
+			<div class="nav">
+				<a class="button" href="/categories/income/edit/<?=$category['categories_id']?>"><span class="ui-icon ui-icon-pencil">редактировать</span></a> 
+				<a class="button del" href="/categories/income/del/<?=$category['categories_id']?>"><span class="ui-icon ui-icon-trash">удалить</span></a>
+			</div>
+			</td>
+		</tr>
+
+		<?php endforeach;?>
+		</table>
+	</div>
+</section>
+
+<script>
+	$( document ).tooltip({
+		items: "tr.overflow",
+		content: function() {
+			return 'Превышен лимит!';
+		}
+	});
+	
+	//$('tr.overflow').tooltip({content: function(){ return "Awesome title!"}});
+</script>

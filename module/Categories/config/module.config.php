@@ -2,7 +2,9 @@
 return array(
 	'controllers' => array(
         'invokables' => array(
-            'Categories\Controller\Income' => 'Categories\Controller\IncomeController'
+            'Categories\Controller\Income' => 'Categories\Controller\IncomeController',
+			'Categories\Controller\Expense' => 'Categories\Controller\ExpenseController',
+			
         ),
     ),
 	
