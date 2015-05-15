@@ -34,8 +34,8 @@
 			<td><?=-$category['overflow'] ?> <span class="rub">Р</span></td>
 			<td>
 			<div class="nav">
-				<a class="button" href="/categories/income/edit/<?=$category['categories_id']?>"><span class="ui-icon ui-icon-pencil">редактировать</span></a> 
-				<a class="button del" href="/categories/income/del/<?=$category['categories_id']?>"><span class="ui-icon ui-icon-trash">удалить</span></a>
+				<a class="button" href="/categories/expense/edit/<?=$category['id']?>"><span class="ui-icon ui-icon-pencil">редактировать</span></a> 
+				<a class="button del" href="/categories/expense/del/<?=$category['id']?>"><span class="ui-icon ui-icon-trash">удалить</span></a>
 			</div>
 			</td>
 		</tr>
@@ -52,6 +52,4 @@
 			return 'Превышен лимит!';
 		}
 	});
-	
-	//$('tr.overflow').tooltip({content: function(){ return "Awesome title!"}});
 </script>

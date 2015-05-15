@@ -18,13 +18,20 @@ return array(
 		'username' => 'root',
 		'password' => '123456',
 		'driver_options' => array(
-			PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''
+			PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\'',
 		),
 	),
 	'service_manager' => array(
 		'factories' => array(
 			'Zend\Db\Adapter\Adapter' => 'Zend\Db\Adapter\AdapterServiceFactory',
 		),
+		'initializers' => array(
+            function ($instance, $sm) {
+                if ($instance instanceof \Zend\Db\Adapter\AdapterAwareInterface) {
+                    $instance->setDbAdapter($sm->get('Zend\Db\Adapter\Adapter'));
+                }
+            }
+        ),
 	),
 
 );

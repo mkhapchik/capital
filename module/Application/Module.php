@@ -33,14 +33,6 @@ class Module
 	public function getServiceConfig()
     {
 		return array(
-            'initializers' => array(
-                function ($instance, $sm) {
-                    if ($instance instanceof \Zend\Db\Adapter\AdapterAwareInterface) {
-                        $instance->setDbAdapter($sm->get('Zend\Db\Adapter\Adapter'));
-                    }
-                }
-            ),
- 
             'factories' => array(
                 'menu' => function($sm){
                     $menutable = new \Application\Model\MenuTable();

@@ -2,7 +2,7 @@
 namespace Account;
 use Zend\Db\TableGateway\TableGateway;
 use Zend\Db\ResultSet\ResultSet;
-use Account\Model\Account;
+use Account\Model\AccountTable;
 use Zend\Mvc\MvcEvent;
 
 class Module
@@ -33,12 +33,18 @@ class Module
 	{
 		return array(
 			'factories' => array(
+				/*
 				'AccountTableGateway' => function ($sm) {
 					$dbAdapter = $sm->get('ZendDbAdapterAdapter');
 					$resultSetPrototype = new ResultSet();
 					$resultSetPrototype->setArrayObjectPrototype(new Account());
 					$tableGateway = new TableGateway('account', $dbAdapter, null, $resultSetPrototype);
 					return $tableGateway;
+				},
+				*/
+				'AccountTable' => function ($sm) {
+					$accountTable = new AccountTable();
+					return $accountTable;
 				},
 			),
 		);

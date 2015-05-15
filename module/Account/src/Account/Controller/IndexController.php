@@ -96,8 +96,7 @@ class IndexController extends AbstractActionController
 	private function getAccountTable()
 	{
 		$sm = $this->getServiceLocator();
-		$accountTableGateway = $sm->get('AccountTableGateway');
-		$table = new AccountTable($accountTableGateway);
-		return $table;
+		$accountTable = $sm->get('AccountTable');
+		return $accountTable;
 	}
 }

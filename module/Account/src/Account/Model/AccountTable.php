@@ -1,36 +1,43 @@
 <?php
 namespace Account\Model;
-use Zend\Db\TableGateway\TableGateway;
 
-class AccountTable
+use Zend\Db\Adapter\Adapter;
+use Zend\Db\ResultSet\HydratingResultSet;
+use Zend\Db\TableGateway\AbstractTableGateway;
+use Zend\Db\Adapter\AdapterAwareInterface;
+use Account\Model\Account;
+
+class AccountTable extends AbstractTableGateway implements AdapterAwareInterface
 {
-	protected $tableGateway;
+	protected $table = 'account';
  
-    public function __construct(TableGateway $tableGateway)
+	public function setDbAdapter(Adapter $adapter)
     {
-        $this->tableGateway = $tableGateway;
+        $this->adapter = $adapter;
+        $this->resultSetPrototype = new HydratingResultSet();
+		$this->initialize();
     }
  
     public function fetchAll()
     {
-        $resultSet = $this->tableGateway->select(array('f_deleted'=>0));
-        return $resultSet;
+        $resultSet = $this->select(array('f_deleted'=>0));
+		$resultSet->setObjectPrototype(new Account());
+       	return $resultSet;
     }
  
     public function getAccount($id)
     {
         $id  = (int) $id;
-        $rowset = $this->tableGateway->select(array('id' => $id, 'f_deleted'=>0));
-        $row = $rowset->current();
-        if (!$row) {
-            throw new \Exception("Could not find row $id");
-        }
+        $rowset = $this->select(array('id' => $id, 'f_deleted'=>0));
+        $rowset->setObjectPrototype(new Account());
+		$row = $rowset->current();
+        if (!$row) throw new \Exception("Could not find row $id");
+        
         return $row;
     }
  
     public function saveAccount(Account $account)
     {
-		
 		$data = array(
             'name' => $account->name,
             'comments'  => $account->comments,
@@ -41,18 +48,18 @@ class AccountTable
         $id = (int)$account->id;
         if ($id == 0) 
 		{
-            $this->tableGateway->insert($data);
+            $this->insert($data);
         } 
 		else 
 		{
-            if ($this->getAccount($id)) $this->tableGateway->update($data, array('id' => $id));
+            if ($this->getAccount($id)) $this->update($data, array('id' => $id));
 			else  throw new \Exception('Form id does not exist');
         }
     }
  
     public function deleteAccount($id)
     {
-        //$this->tableGateway->delete(array('id' => $id));
-		$this->tableGateway->update(array('f_deleted'=>1), array('id' => $id));
+        //$this->delete(array('id' => $id));
+		$this->update(array('f_deleted'=>1), array('id' => $id));
     }
 }

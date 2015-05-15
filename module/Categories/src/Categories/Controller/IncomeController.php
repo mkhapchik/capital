@@ -4,7 +4,6 @@ namespace Categories\Controller;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 use Categories\Model\Category;
-use Categories\Model\CategoryTable;
 use Categories\Form\IncomeForm;
 
 class IncomeController extends AbstractActionController
