@@ -94,3 +94,40 @@
 	width:200px;
 	
 }
+
+.b-form input.date{	
+	float:left;
+	border-radius:5px 0	0 5px;
+}
+
+img.ui-datepicker-trigger{
+	float:right;
+	cursor:pointer;
+	
+}
+
+.b-form input.currency{
+	
+}
+
+.b-form-inline{
+	width:100%;
+}
+.b-form-inline .form_element{
+	float:left;
+	width: auto;
+	clear: none;
+	padding:5px;
+}
+
+.b-form-inline .form_element input.date{
+	width: 100px;
+}
+
+.b-form-inline .form_element input.currency{
+	width: 100px;
+}
+
+.b-form-inline .button{
+	clear:both;
+}

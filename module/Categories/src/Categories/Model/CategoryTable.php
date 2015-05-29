@@ -6,7 +6,7 @@ use Zend\Db\ResultSet\HydratingResultSet;
 use Zend\Db\TableGateway\AbstractTableGateway;
 use Zend\Db\Adapter\AdapterAwareInterface;
 use Categories\Model\Category;
-
+use Zend\Db\Sql\Select;
 
 class CategoryTable extends AbstractTableGateway implements AdapterAwareInterface
 {
@@ -79,6 +79,17 @@ class CategoryTable extends AbstractTableGateway implements AdapterAwareInterfac
 	public function setType($type)
 	{
 		$this->type = $type;
+	}
+	
+	public function getGuide()
+	{
+		$type = $this->type;
+		$resultSet = $this->select(function (Select $select) use($type){
+			$select->columns(array('id','name'));
+			$select->where->equalTo('f_deleted', 0)->equalTo('type', 1);
+		});
+		
+		return $resultSet->toArray();
 	}
 	
 }

@@ -6,6 +6,7 @@ use Zend\Db\ResultSet\HydratingResultSet;
 use Zend\Db\TableGateway\AbstractTableGateway;
 use Zend\Db\Adapter\AdapterAwareInterface;
 use Account\Model\Account;
+use Zend\Db\Sql\Select;
 
 class AccountTable extends AbstractTableGateway implements AdapterAwareInterface
 {
@@ -62,4 +63,14 @@ class AccountTable extends AbstractTableGateway implements AdapterAwareInterface
         //$this->delete(array('id' => $id));
 		$this->update(array('f_deleted'=>1), array('id' => $id));
     }
+	
+	public function getGuide()
+	{
+		$resultSet = $this->select(function (Select $select) {
+			$select->columns(array('id','name'));
+			$select->where->equalTo('f_deleted', 0);
+		});
+		
+		return $resultSet->toArray();
+	}
 }
