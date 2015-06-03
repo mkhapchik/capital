@@ -18,19 +18,20 @@ class TransactionIncomeForm extends Form
 	* @param $type - тип транзакции 1 - доход, 0 - расход
 	* @param $name - имя формы
 	*/
-	public function __construct($type=1, $name = 'transaction_income')
+	public function __construct($name = 'transaction')
     {
         parent::__construct($name);
 		
-		$this->type = $type ? 1 : 0;
+		//$this->type = $type ? 1 : 0;
 		$this->categories = array();
 		$this->accounts = array();
     }
 	
-	public function init()
+	public function init($count=1)
 	{
-		 $this->setAttribute('method', 'post');
-          
+		
+		$this->setAttribute('method', 'post');
+        /*  
 		$this->add(array(
             'name' => 'id',
             'attributes' => array(
@@ -95,7 +96,25 @@ class TransactionIncomeForm extends Form
                 'label' => 'Комментрарий',
             ),
         )); 
-  
+		*/
+
+		$this->add(array(
+            'name' => 'transaction',
+			'type' => 'Zend\Form\Element\Collection',
+            'options' => array(
+                'use_as_base_fieldset' => true,
+				'count' => $count,
+                'should_create_template' => true,
+                'allow_add' => true,
+				/*
+				'target_element' => array(
+                    'type' => 'Transactions\Form\TransactionIncomeFieldset'
+                )
+				*/
+				'target_element' => new \Transactions\Form\TransactionIncomeFieldset($this->categories, $this->accounts)
+            )
+        ));
+ 
 		$this->add(array(
             'name' => 'submit',
             'attributes' => array(

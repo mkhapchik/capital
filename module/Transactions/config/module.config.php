@@ -39,9 +39,9 @@ return array(
 								'id'     => '[0-9]+',
                             ),
                             'defaults' => array(
-								'__NAMESPACE__' => 'Categories\Controller',
-								'controller'    => 'Expense',
-								'action'        => 'index',
+								'__NAMESPACE__' => 'Transactions\Controller',
+								'controller'    => 'TransactionExpense',
+								'action'        => 'add',
                             ),
                         ),
 					)

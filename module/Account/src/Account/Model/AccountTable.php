@@ -69,6 +69,7 @@ class AccountTable extends AbstractTableGateway implements AdapterAwareInterface
 		$resultSet = $this->select(function (Select $select) {
 			$select->columns(array('id','name'));
 			$select->where->equalTo('f_deleted', 0);
+			$select->order('statistic DESC');
 		});
 		
 		return $resultSet->toArray();

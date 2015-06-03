@@ -6,32 +6,65 @@
 
 	<?php
 	$form = $this->form;
-	$form->setAttribute('action', '/categories/income/add');
+	$form->setAttribute('action', '');
 	$form->prepare();
+	$collections = $form->get('transaction');
+	$template = $collections->getTemplateElement();
 	echo $this->form()->openTag($form);
 	?>
-	<div class="group">
-		<div class="form_element">
-			<?=$this->formRow($form->get('date'))?>
-		</div>
-		<div class="form_element">
-			<?=$this->formRow($form->get('amount'))?>
-		</div>
-		<div class="form_element">
-			<?=$this->formRow($form->get('categories_id'))?>
-		</div>
-		<div class="form_element">
-			<?=$this->formRow($form->get('account_id'))?>
-		</div>
-		<div class="form_element">
-			<?=$this->formRow($form->get('comment'))?>
-		</div>
+	
+	<div class="group template" style="display:none;">
+		<?php foreach($template as $t): ?><div class="form_element"><?=$this->formRow($t);?></div><?php endforeach;?>	
+		
+		<button onclick="return remove_transaction($(this), 400)">-</button>
+		
 		<div class="clear"></div>
 	</div>
+	<!--
+	<div class="nav">
+		<button onclick="return new_transaction(500)">+</button>
+	</div>
+	-->
 	<div class="form_element button">
 		<?=$this->formRow($form->get('submit'))?>
 	</div>
 	<?php echo $this->form()->closeTag(); ?>
 	<div class="clear"></div>
 	</div>
+	<div id="test"></div>
 </section>
+
+<script>
+    function new_transaction(duration) 
+	{
+        duration = duration ? duration : 0;
+		var currentCount = $('form > .group:not(.template)').length;
+		var template = $('form > .template').clone(true, true);
+        template.removeClass('template');
+		
+		var txt = template.html().replace(/__index__/g, currentCount);
+		template.html(txt);
+
+		if(currentCount>0) $('form > .group:last').after(template);
+		else $('form').prepend(template);
+		template.show(duration);
+        return false;
+    }
+	
+	function remove_transaction(btn, duration)
+	{
+		duration = duration ? duration : 0;
+		var currentCount = $('form > .group:not(.template)').length;
+		if(currentCount>1) btn.parents('.group:eq(0)').hide(duration, function(){$(this).remove()});
+		return false;
+	}
+	
+	$(document).ready(function(){
+		new_transaction();
+		$('body').on('change', '.currency', function(){
+			new_transaction(500);
+		});
+		
+	});
+	
+</script>

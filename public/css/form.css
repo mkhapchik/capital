@@ -96,8 +96,8 @@
 }
 
 .b-form input.date{	
-	float:left;
-	border-radius:5px 0	0 5px;
+	/*float:left;*/
+	/*border-radius:5px 0	0 5px;*/
 }
 
 img.ui-datepicker-trigger{
