@@ -6,97 +6,29 @@ use Zend\InputFilter\Factory as InputFactory;
 use Zend\InputFilter\InputFilter;
 use Zend\Validator\StringLength;
 use Zend\Validator\NotEmpty;
+use Transactions\Form\TransactionFieldset;
 
- 
-class TransactionIncomeForm extends Form
+class TransactionForm extends Form
 {
-    private $type;
 	private $categories;
+	private $accounts;
 	
 	/**
 	* Конструктор
 	* @param $type - тип транзакции 1 - доход, 0 - расход
 	* @param $name - имя формы
 	*/
-	public function __construct($name = 'transaction')
+	public function __construct($name = 'transaction_form')
     {
         parent::__construct($name);
-		
-		//$this->type = $type ? 1 : 0;
+
 		$this->categories = array();
 		$this->accounts = array();
     }
 	
 	public function init($count=1)
 	{
-		
 		$this->setAttribute('method', 'post');
-        /*  
-		$this->add(array(
-            'name' => 'id',
-            'attributes' => array(
-                'type'  => 'hidden',
-            ),
-        ));
-		
-		$this->add(array(
-            'name' => 'date',
-            'attributes' => array(
-                'type'  => 'text',
-				'class'=>'date'
-            ),
-            'options' => array(
-                'label' => 'Дата',
-            ),
-        ));
-		
-		$this->add(array(
-            'name' => 'amount',
-            'attributes' => array(
-                'type'  => 'text',
-				'class'=>'currency'
-            ),
-            'options' => array(
-                'label' => 'Сумма',
-            ),
-        ));
-		
-		$this->add(array(
-            'name' => 'categories_id',
-            'type' => 'Select',
-			'attributes' => array(
-               //'value'=>3
-            ),
-            'options' => array(
-                'label' => 'Категория',
-				'value_options' => $this->categories,
-				//'empty_option' => 'Please choose your language',
-            ),
-			
-        ));
-		
-		$this->add(array(
-            'name' => 'account_id',
-            'type' => 'Select',
-			'attributes' => array(
-                
-            ),
-            'options' => array(
-                'label' => 'Счет',
-				'value_options' => $this->accounts
-            ),
-        )); 
-		
-		$this->add(array(
-            'name' => 'comment',
-            'attributes' => array(
-                'type'  => 'text',
-            ),
-            'options' => array(
-                'label' => 'Комментрарий',
-            ),
-        )); 
-		*/
 
 		$this->add(array(
             'name' => 'transaction',
@@ -108,10 +40,10 @@ class TransactionIncomeForm extends Form
                 'allow_add' => true,
 				/*
 				'target_element' => array(
-                    'type' => 'Transactions\Form\TransactionIncomeFieldset'
+                    'type' => 'Transactions\Form\TransactionFieldset'
                 )
 				*/
-				'target_element' => new \Transactions\Form\TransactionIncomeFieldset($this->categories, $this->accounts)
+				'target_element' => new TransactionFieldset($this->categories, $this->accounts)
             )
         ));
  
@@ -124,17 +56,16 @@ class TransactionIncomeForm extends Form
             ),
         ));
 		
-		$inputFilter = $this->__getInputFilter();
-		$this->setInputFilter($inputFilter);
 	}
 	
+	/*
 	private function __getInputFilter()
 	{
 		
 		$inputFilter = new InputFilter();
 		$factory     = new InputFactory();
 
-		/*
+		
 		$inputFilter->add($factory->createInput(array(
 			'name'     => 'id',
 			'required' => true,
@@ -173,10 +104,11 @@ class TransactionIncomeForm extends Form
 				
 			),
 		)));
-		*/
+		
 		
 		return $inputFilter;
 	}
+	*/
 	
 	public function setCategories($categories)
 	{

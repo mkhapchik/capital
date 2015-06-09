@@ -1,5 +1,6 @@
 <?php
 namespace Transactions;
+use Transactions\Model\TransactionTable;
 
 class Module
 {
@@ -18,4 +19,16 @@ class Module
             ),
         );
     }
+	
+	public function getServiceConfig()
+	{
+		return array(
+			'factories' => array(
+				'TransactionTable' => function ($sm) {
+					$transactionTable =  new TransactionTable();
+					return $transactionTable;
+				}
+			),
+		);
+	}
 }

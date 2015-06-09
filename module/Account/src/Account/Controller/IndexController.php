@@ -18,9 +18,7 @@ class IndexController extends AbstractActionController
     {
 		$accountTable = $this->getAccountTable();
 		$accounts = $accountTable->fetchAll();
-		//$accounts = $accountTable->getAccount(1);
-			
-			
+		
 		$this->layout()->setVariable('title', 'Счета');
 		
 		$view = new ViewModel(array(

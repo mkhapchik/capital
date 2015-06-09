@@ -7,5 +7,18 @@ $(document).ready(function(){
 		$(this).datepicker({dateFormat: "dd.mm.yy"}).datepicker( "show" );
 	});
 	
+	$('body').on('change', 'select', function(){
+		setSelectStyle($(this))
+	});
+	
+	$('select').each(function(){
+		setSelectStyle($(this));
+	});
+	
 });
 
+function setSelectStyle(sel)
+{
+	if(sel.val().length==0) sel.addClass('empty');
+	else sel.removeClass('empty');
+}

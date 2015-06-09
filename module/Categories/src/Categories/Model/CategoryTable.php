@@ -86,7 +86,8 @@ class CategoryTable extends AbstractTableGateway implements AdapterAwareInterfac
 		$type = $this->type;
 		$resultSet = $this->select(function (Select $select) use($type){
 			$select->columns(array('id','name'));
-			$select->where->equalTo('f_deleted', 0)->equalTo('type', 1);
+			$select->where->equalTo('f_deleted', 0)->equalTo('type', $type);
+			$select->order('statistic DESC');
 		});
 		
 		return $resultSet->toArray();

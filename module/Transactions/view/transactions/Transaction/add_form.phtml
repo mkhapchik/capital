@@ -1,0 +1,97 @@
+<?php
+	$form->setAttribute('action', '');
+	$form->prepare();
+	$collections = $form->get('transaction');
+	
+	$template = $collections->getTemplateElement();
+?>
+<section class="block b-form b-form-inline" id="transaction_block">
+	<header class="head">
+	<h1><?=$header?></h1>
+	</header>
+	<div class="body">
+
+	<div class="group template" style="display:none;">
+		<?php foreach($template as $t): ?><div class="form_element"><?=$this->formRow($t);?></div><?php endforeach;?>	
+		
+		<button class="remove" onclick="remove_transaction($(this), 400); return false;">-</button>
+		
+		<div class="clear"></div>
+	</div>
+	
+	<?php if(!empty($message)):?>
+	<div class="message"><span class="error"><?=$message?></span></div>
+	<?php endif;?>
+	
+	<?=$this->form()->openTag($form);?>
+		
+	<?php foreach($collections as $col):?>
+	<div class="group">
+		<?php foreach($col as $el): ?><div class="form_element"><?=$this->formRow($el);?></div><?php endforeach;?>	
+		<button class="remove" onclick="remove_transaction($(this), 400); return false;">-</button>
+		<div class="clear"></div>
+	</div>
+	<?php endforeach;?>
+	<!--
+	<div class="nav">
+		<button onclick="return new_transaction(500)">+</button>
+	</div>
+	-->
+	<div class="form_element button">
+		<?=$this->formRow($form->get('submit'))?>
+	</div>
+	<?php echo $this->form()->closeTag(); ?>
+	<div class="clear"></div>
+	</div>
+	<div id="test"></div>
+</section>
+
+<script>
+    function new_transaction(duration) 
+	{
+        duration = duration ? duration : 0;
+		var currentCount = $('form > .group:not(.template)').length;
+		
+		var template = $('#transaction_block .template').clone(true, true);
+		
+        template.removeClass('template');
+		
+		var txt = template.html().replace(/__index__/g, currentCount);
+		template.html(txt);
+
+		if(currentCount>0) $('form > .group:last').after(template);
+		else $('form').prepend(template);
+		template.show(duration);
+        return false;
+    }
+	
+	function remove_transaction(btn, duration)
+	{
+		duration = duration ? duration : 0;
+		var currentCount = $('form > .group:not(.template)').length;
+		if(currentCount>1) btn.parents('.group:eq(0)').hide(duration, function(){$(this).remove()});
+		return false;
+	}
+	
+	$(document).ready(function(){
+		//new_transaction();
+		var currency_timeId;
+		$('body').on('input', ".currency:not('.complite')", function(){
+			var currency = $(this);
+			clearTimeout(currency_timeId);
+			currency_timeId = setTimeout(function(){new_transaction(500); currency.addClass('complite')},4000)	
+		});
+		
+		$('#transaction_block form').submit(function(){
+			var last_group = $(this).find(".group:last");
+			if(	last_group.find('.currency').val()=='' && last_group.find('.categories').val()=='' && last_group.find('.account').val()=='')
+			{
+				remove_transaction(last_group.find('.remove'), 0);
+			}
+			
+			return true;
+		});
+		
+	});
+	
+</script>
