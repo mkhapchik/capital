@@ -1,7 +1,7 @@
 ﻿--
 -- Скрипт сгенерирован Devart dbForge Studio for MySQL, Версия 6.3.341.0
 -- Домашняя страница продукта: http://www.devart.com/ru/dbforge/mysql/studio
--- Дата скрипта: 14.05.2015 16:58:44
+-- Дата скрипта: 11.06.2015 16:11:01
 -- Версия сервера: 5.5.23
 -- Версия клиента: 4.1
 --
@@ -31,6 +31,7 @@ CREATE TABLE account (
   amount DECIMAL(8, 2) NOT NULL DEFAULT 0.00 COMMENT 'Сумма',
   comments VARCHAR(500) DEFAULT NULL COMMENT 'Комментарий к счету',
   f_deleted INT(11) NOT NULL DEFAULT 0 COMMENT 'Флаг 1 - аккаунт удален',
+  statistic BIGINT(20) DEFAULT NULL COMMENT 'Статистика употребления в процентах',
   PRIMARY KEY (id)
 )
 ENGINE = INNODB
@@ -50,11 +51,12 @@ CREATE TABLE categories (
   statistic BIGINT(20) DEFAULT NULL COMMENT 'Статистика употребления в процентах',
   amount_limit DECIMAL(8, 0) DEFAULT NULL COMMENT 'Лимит в месяц',
   f_deleted INT(11) NOT NULL DEFAULT 0 COMMENT 'Флаг удаления 1 -удален 0 - не удален',
+  color VARCHAR(255) DEFAULT NULL COMMENT 'Цвет категории (запланировано)',
   PRIMARY KEY (id)
 )
 ENGINE = INNODB
-AUTO_INCREMENT = 11
-AVG_ROW_LENGTH = 1820
+AUTO_INCREMENT = 14
+AVG_ROW_LENGTH = 1365
 CHARACTER SET cp1251
 COLLATE cp1251_general_ci
 COMMENT = 'Категории расхода и дохода';
@@ -72,8 +74,8 @@ CREATE TABLE menu (
   PRIMARY KEY (id)
 )
 ENGINE = INNODB
-AUTO_INCREMENT = 4
-AVG_ROW_LENGTH = 5461
+AUTO_INCREMENT = 6
+AVG_ROW_LENGTH = 3276
 CHARACTER SET cp1251
 COLLATE cp1251_general_ci
 COMMENT = 'Меню';
@@ -162,8 +164,8 @@ CREATE TABLE transactions (
     REFERENCES categories(id) ON DELETE NO ACTION ON UPDATE NO ACTION
 )
 ENGINE = INNODB
-AUTO_INCREMENT = 23
-AVG_ROW_LENGTH = 744
+AUTO_INCREMENT = 60
+AVG_ROW_LENGTH = 309
 CHARACTER SET cp1251
 COLLATE cp1251_general_ci
 COMMENT = 'Операции по счетам';
@@ -236,6 +238,9 @@ BEGIN
   DECLARE v_type int;
   DECLARE v_amount_res decimal(8,2);
   DECLARE v_amount_limit decimal(8,2);
+  DECLARE v_lastId bigint(20);
+                    
+                   
   
   SELECT c.type INTO v_type FROM categories c WHERE c.id=p_categories_id;
   
@@ -246,6 +251,9 @@ BEGIN
   END IF;
 
   INSERT INTO transactions (date, amount, categories_id, account_id, comment, op_sign) VALUES(p_date, p_amount, p_categories_id, p_account_id, p_comment, v_op_sign);
+  
+  SET v_lastId = LAST_INSERT_ID();
+  
   CALL update_accounts(p_account_id);
   CALL update_statistic();
 
@@ -255,6 +263,7 @@ BEGIN
   
   SELECT v_amount_res, v_amount_limit, IF(v_amount_res>v_amount_limit, 1, 0) AS overflow;
   */
+  SELECT v_lastId as id;
 END
 $$
 
@@ -265,9 +274,17 @@ CREATE DEFINER = 'root'@'localhost'
 PROCEDURE update_accounts(IN p_account_id bigint(20))
   COMMENT 'Обновление счета'
 BEGIN
+  DECLARE v_count int;
+  DECLARE v_total int;
+  DECLARE v_percent int;
   DECLARE v_amount decimal(8,2);
-  SELECT SUM(t.amount*t.op_sign) INTO v_amount FROM transactions t WHERE t.account_id=p_account_id;
-  UPDATE account a SET a.amount=v_amount WHERE a.id=p_account_id;
+   
+  SELECT SUM(t.amount*t.op_sign),COUNT(id) INTO v_amount,v_count FROM transactions t WHERE t.account_id=p_account_id;      
+  SELECT COUNT(id) INTO v_total FROM transactions;
+   
+  SET v_percent = (v_count/v_total) * 100;
+    
+  UPDATE account a SET a.amount=v_amount, a.statistic=v_percent WHERE a.id=p_account_id;
 END
 $$
 
@@ -315,30 +332,35 @@ DELIMITER ;
 -- Вывод данных для таблицы account
 --
 INSERT INTO account VALUES
-(1, 'Наличные', -1301.00, 'Тестовый счет', 0),
-(2, 'Карта', 300.00, 'Карта для накопления на яхту', 0);
+(1, 'Наличные', 127710.00, 'Тестовый счет', 1, 79),
+(2, 'Карта', 638.00, 'Карта для накопления на яхту', 1, 23);
 
 -- 
 -- Вывод данных для таблицы categories
 --
 INSERT INTO categories VALUES
-(1, 'Категория дохода', 1, 80, NULL, 0),
-(2, 'Категория расхода', 0, 29, 500, 0),
-(4, 'Категория расхода 2', 0, 71, 8000, 0),
-(5, 'Категория дохода 2', 1, 20, NULL, 0),
-(6, 'еуые', 1, 0, 0, 1),
-(7, 'test', 1, 0, 0, 1),
-(8, 'test3333333', 1, NULL, NULL, 1),
-(9, 'test2', 1, 0, 0, 1),
-(10, 'test', 1, NULL, NULL, 1);
+(1, 'Категория дохода12', 1, 63, NULL, 0, NULL),
+(2, 'Категория расхода', 0, NULL, 5000, 0, NULL),
+(4, 'Категория расхода 2', 0, 72, 8000, 0, NULL),
+(5, 'Категория дохода 2', 1, 37, NULL, 0, NULL),
+(6, 'еуые', 1, 0, 0, 1, NULL),
+(7, 'test', 1, 0, 0, 1, NULL),
+(8, 'test3333333', 1, 0, NULL, 1, NULL),
+(9, 'test2', 1, 0, 0, 1, NULL),
+(10, 'test', 1, 0, NULL, 1, NULL),
+(11, 'test', 0, 0, 121, 1, NULL),
+(12, 'test', 1, NULL, NULL, 0, NULL),
+(13, 'test2', 0, NULL, 0, 1, NULL);
 
 -- 
 -- Вывод данных для таблицы menu
 --
 INSERT INTO menu VALUES
-(1, 'account', 'Счета', 'account/default', '1', '1'),
-(2, 'income', 'Категории дохода', 'categories/income', '2', '1'),
-(3, 'expense', 'Категории расхода', 'categories/expense', '3', '1');
+(1, 'account', 'Счета', 'account/default', '3', '1'),
+(2, 'income', 'Категории дохода', 'categories/income', '4', '1'),
+(3, 'expense', 'Категории расхода', 'categories/expense', '5', '1'),
+(4, 'transactions_income', 'Доходы', 'transactions/income', '2', '1'),
+(5, 'transactions_expense', 'Расходы', 'transactions/expense', '1', '1');
 
 -- 
 -- Вывод данных для таблицы tasks
@@ -365,7 +387,6 @@ INSERT INTO transactions VALUES
 (1, '2015-03-13', 100.00, 2, 1, 'тест расхода', -1),
 (2, '2015-03-13', 1000.00, 1, 1, 'тест доход', 1),
 (3, '2015-03-13', 200.00, 4, 1, NULL, -1),
-(4, '2015-03-13', 200.00, 4, 1, 'ttt', -1),
 (5, '2015-03-13', 500.00, 1, 1, NULL, 1),
 (6, '2015-03-13', 100.00, 4, 1, NULL, -1),
 (7, '2015-03-13', 3000.00, 1, 1, 'ttt', 1),
@@ -383,7 +404,39 @@ INSERT INTO transactions VALUES
 (19, '2015-03-13', 1000.00, 4, 1, 'ttt', -1),
 (20, '2015-03-13', 1000.00, 4, 1, 'ttt', -1),
 (21, '2015-03-13', 1000.00, 4, 1, 'ttt', -1),
-(22, '2015-03-13', 1000.00, 4, 1, 'ttt', -1);
+(22, '2015-03-13', 1000.00, 4, 1, 'ttt', -1),
+(23, '2005-06-20', 555.00, 5, 1, 'test1', 1),
+(24, '2005-06-20', 666.00, 5, 1, 'test2', 1),
+(25, '2005-06-20', 666.00, 5, 1, 'test2', 1),
+(26, '2005-06-20', 666.00, 5, 1, 'test2', 1),
+(27, '2005-06-20', 777.00, 1, 2, 'test2', 1),
+(28, '2009-06-20', 1235.00, 1, 1, 'Очень длинный комментарий про очень длинную информацию', 1),
+(29, '2009-06-20', 120.00, 1, 1, '', 1),
+(30, '2009-06-20', 50.00, 5, 1, '', 1),
+(36, '2010-06-20', 1000.00, 4, 2, '', -1),
+(37, '2011-06-20', 123.00, 1, 2, 'Лента', 1),
+(38, '2011-06-20', 123.00, 5, 2, 'Лента', 1),
+(39, '2011-06-20', 500.00, 1, 1, 'Лента', 1),
+(40, '2011-06-20', 123.00, 1, 1, '', 1),
+(41, '2011-06-20', 123.00, 5, 1, '', 1),
+(42, '2011-06-20', 123.00, 5, 1, '', 1),
+(43, '2011-06-20', 0.00, 1, 1, '', 1),
+(44, '2011-06-20', 123.00, 1, 1, '', 1),
+(45, '2011-06-20', 123.00, 1, 1, '', 1),
+(46, '2011-06-20', 123.00, 1, 2, '', 1),
+(47, '2011-06-20', 123.00, 1, 1, '', 1),
+(48, '2011-06-20', 0.00, 1, 2, '', 1),
+(49, '2011-06-20', 123.00, 5, 1, '', 1),
+(50, '2011-06-20', 123.00, 5, 1, '', 1),
+(51, '2011-06-20', 123.00, 1, 2, '', 1),
+(52, '2011-06-20', 123.00, 1, 2, '', 1),
+(53, '2011-06-20', 123.00, 1, 2, '', 1),
+(54, '2011-06-20', 123.00, 1, 2, '', 1),
+(55, '2011-06-20', 123123.00, 1, 1, '', 1),
+(56, '2011-06-20', 123.00, 5, 1, '', 1),
+(57, '2011-06-20', 123.00, 1, 2, '', 1),
+(58, '2011-06-20', 123.00, 5, 1, '', 1),
+(59, '2011-06-20', 123.00, 4, 2, '', -1);
 
 -- 
 -- Восстановить предыдущий режим SQL (SQL mode)
