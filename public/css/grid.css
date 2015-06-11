@@ -129,6 +129,9 @@ footer{
 	vertical-align:middle;
 }
 
+.block .body .message{
+	padding: 5px;
+}
 
 .rub{
 	display: inline-block;

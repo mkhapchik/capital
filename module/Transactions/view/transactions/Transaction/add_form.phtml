@@ -10,7 +10,7 @@
 	<h1><?=$header?></h1>
 	</header>
 	<div class="body">
-
+	
 	<div class="group template" style="display:none;">
 		<?php foreach($template as $t): ?><div class="form_element"><?=$this->formRow($t);?></div><?php endforeach;?>	
 		
@@ -20,8 +20,10 @@
 	</div>
 	
 	<?php if(!empty($message)):?>
-	<div class="message"><span class="error"><?=$message?></span></div>
+	<div class="message"><span class="<?=$is_success ? 'success' : 'error'?>"><?=$message?></span></div>
 	<?php endif;?>
+	
+	
 	
 	<?=$this->form()->openTag($form);?>
 		
@@ -73,6 +75,28 @@
 		return false;
 	}
 	
+	function autocompleteCommentInit(input)
+	{
+		var str = input.val();
+		if(str.length<3)
+		{
+			input.autocomplete( "option", "source", []);
+		}
+		else
+		{
+			$.ajax({
+				url: window.location.href+'/getComments',
+				method: 'post',
+				dataType: 'json',
+				data:{param:str},
+				success: function(source){
+					input.autocomplete( "option", "source", source);
+				}
+			});
+		}
+		
+	}
+	
 	$(document).ready(function(){
 		//new_transaction();
 		var currency_timeId;
@@ -90,6 +114,14 @@
 			}
 			
 			return true;
+		});
+		
+		
+		$('body').on('input', ".comment", function(){
+			$(this).autocomplete({
+				//delay: 500
+			});
+			autocompleteCommentInit($(this));	
 		});
 		
 	});

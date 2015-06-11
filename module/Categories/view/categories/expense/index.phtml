@@ -29,9 +29,9 @@
 		<tr class="<?=$class?>">
 			<td><?=$category['name'] ?></td>
 			
-			<td><?=$category['amount_limit'] ?> <span class="rub">Р</span></td>
-			<td><?=$category['sum'] ?> <span class="rub">Р</span></td>
-			<td><?=-$category['overflow'] ?> <span class="rub">Р</span></td>
+			<td><?=$category['amount_limit'] ? $category['amount_limit'] : '0.00' ?> <span class="rub">Р</span></td>
+			<td><?=$category['sum'] ? $category['sum'] : '0.00' ?> <span class="rub">Р</span></td>
+			<td><?= $category['overflow']? -$category['overflow']  :'0.00' ?> <span class="rub">Р</span></td>
 			<td>
 			<div class="nav">
 				<a class="button" href="/categories/expense/edit/<?=$category['id']?>"><span class="ui-icon ui-icon-pencil">редактировать</span></a> 

@@ -3,6 +3,7 @@ return array(
 	'controllers' => array(
         'invokables' => array(
             'Transactions\Controller\TransactionIncome' => 'Transactions\Controller\TransactionIncomeController',	
+			'Transactions\Controller\TransactionExpense' => 'Transactions\Controller\TransactionExpenseController',	
         ),
     ),
 	
@@ -18,25 +19,25 @@ return array(
 					'income' => array(
                         'type'    => 'Segment',
                         'options' => array(
-                            'route'    => '/income[/:action][/:id]',
+                            'route'    => '/income[/:action][/:param]',
                             'constraints' => array(
                                 'action'     => '[a-zA-Z][a-zA-Z0-9_-]*',
-								'id'     => '[0-9]+',
+								'param'     => '[a-zA-Z][a-zA-Z0-9_-]+',
                             ),
                             'defaults' => array(
 								'__NAMESPACE__' => 'Transactions\Controller',
 								'controller'    => 'TransactionIncome',
 								'action'        => 'add',
                             ),
-                        ),
+                        ),						
                     ),
 					'expense'=>array(
 						'type'    => 'Segment',
                         'options' => array(
-                            'route'    => '/expense[/:action][/:id]',
+                            'route'    => '/expense[/:action][/:param]',
                             'constraints' => array(
                                 'action'     => '[a-zA-Z][a-zA-Z0-9_-]*',
-								'id'     => '[0-9]+',
+								'param'     => '[a-zA-Z][a-zA-Z0-9_-]+',
                             ),
                             'defaults' => array(
 								'__NAMESPACE__' => 'Transactions\Controller',

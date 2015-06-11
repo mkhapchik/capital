@@ -20,7 +20,7 @@
 		?>
 		<tr>
 			<td><?=$category['name'] ?></td>
-			<td><?=$category['sum'] ?> <span class="rub">Р</span></td>
+			<td><?=$category['sum']?$category['sum']:'0.00' ?> <span class="rub">Р</span></td>
 			<td>
 			<div class="nav">
 				<a class="button edit" href="/categories/income/edit/<?=$category['id']?>"><span class="ui-icon ui-icon-pencil">редактировать</span></a> 

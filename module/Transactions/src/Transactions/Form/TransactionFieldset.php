@@ -87,6 +87,7 @@ class TransactionFieldset extends Fieldset implements InputFilterProviderInterfa
             'name' => 'comment',
             'attributes' => array(
                 'type'  => 'text',
+				'class'=>'comment'
             ),
             'options' => array(
                 'label' => 'Комментрарий',

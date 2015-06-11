@@ -6,13 +6,14 @@ use Zend\View\Model\ViewModel;
 use Transactions\Form\TransactionForm;
 use Transactions\Entity\Transaction;
 
+
 abstract class AbstractTransactionController extends AbstractActionController
 {
 	/**
 	* Тип операции 1 - доход, 0 - расход
 	*/
 	protected $type;
-	
+		
 	public function addAction()
 	{
 		$form = new TransactionForm();
@@ -24,6 +25,9 @@ abstract class AbstractTransactionController extends AbstractActionController
 		
 		$form->init();
         $form->get('submit')->setValue('Сохранить');
+ 
+		$message=false;
+		$is_success = $this->params()->fromQuery('success', 0);
  
         $request = $this->getRequest();
         
@@ -50,19 +54,47 @@ abstract class AbstractTransactionController extends AbstractActionController
 					}
 					
 					$transactionTable->commit();
+					
+					$url = $this->plugin('url')->fromRoute()."?success=1";
+					return $this->redirect()->toUrl($url);
 				}
 				catch(\Exception $e)
 				{
 					$transactionTable->rollback();
-					return array('form' => $form, 'message'=>'Ошибка сохранения данных!');
+					$message = 'Ошибка сохранения данных!';
+					$is_success = 0;
 				}
-				
-				return $this->redirect()->toRoute('transactions/income');
-				
             }
+			else
+			{
+				$message = '';
+				$is_success=0;
+			}
+		}
+
+		if($is_success) $message = 'Данные успешно добавлены';
+		return array('form' => $form, 'is_success'=>$is_success, 'message'=>$message);
+	}
+	
+	public function getCommentsAction()
+	{
+		$request = $this->getRequest();
+		$str = $request->getPost()->get('param', false);
+		
+		$result = array();
+		if($str)
+		{
+			$transactionTable = $this->getTransactionTable();
+			$transactionTable->setType($this->type);
+			$res = $transactionTable->getComments($str);
+			if(is_array($res) && count($res)>0)
+			{
+				foreach($res as $v) $result[]=$v['comment'];
+			}
 		}
 		
-		return array('form' => $form);
+		echo json_encode($result);
+		exit();
 	}
 	
 	protected function getCategories()
