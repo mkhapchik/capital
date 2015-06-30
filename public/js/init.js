@@ -3,8 +3,11 @@ $(document).ready(function(){
 	$( 'a' ).tooltip({});
 	
 	$('body').on('click', 'input.date', function(){
+		
 		$(this).datepicker('destroy');
-		$(this).datepicker({dateFormat: "dd.mm.yy"}).datepicker( "show" );
+		$(this).datepicker({dateFormat: "dd.mm.yy"}).datepicker( "show" ).datepicker( "setDate", $(this).val());
+		
+		return false;
 	});
 	
 	$('body').on('change', 'select', function(){

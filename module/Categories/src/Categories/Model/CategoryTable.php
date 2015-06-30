@@ -24,9 +24,10 @@ class CategoryTable extends AbstractTableGateway implements AdapterAwareInterfac
 		$this->initialize();
     }
  
-    public function fetchAll()
+    public function fetchAll($date='CURRENT_DATE()')
     {
-		$query = "CALL getOverflow('2015-03-01', {$this->type})";
+		$date = in_array($date, array('null', 'CURRENT_DATE()')) ? $date : "'$date'";
+		$query = "CALL getOverflow($date, {$this->type})";
 		$r = $this->adapter->query($query, Adapter::QUERY_MODE_EXECUTE);
 		
 		$result = $r->toArray();

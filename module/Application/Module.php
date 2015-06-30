@@ -14,7 +14,9 @@ use Zend\Mvc\MvcEvent;
 
 class Module
 {
-    public function getAutoloaderConfig()
+    private $acl;
+	
+	public function getAutoloaderConfig()
     {
 		return array(
             'Zend\Loader\StandardAutoloader' => array(
@@ -51,11 +53,19 @@ class Module
 	*/
 	public function onBootstrap(MvcEvent $e)
     {
+		$this->initAcl($e);
+		
 		$eventManager        = $e->getApplication()->getEventManager();
 		$moduleRouteListener = new ModuleRouteListener();
         $moduleRouteListener->attach($eventManager);
-		
+
 		$eventManager->attach(MvcEvent::EVENT_ROUTE, array($this, 'addRoutes'), 2);
+		
+		
+		$eventManager->attach(MvcEvent::EVENT_ROUTE, array($this, 'checkAccess'));
+		
+		
+		
     }
 	
 	public function addRoutes(MvcEvent $e)
@@ -64,13 +74,25 @@ class Module
 		$route = \Zend\Mvc\Router\Http\Literal::factory(array(
 			'route' => '/foo',
 			'defaults' => array(
-				'__NAMESPACE__' => 'Account\Controller',
-				'controller'    => 'Index',
-				'action'        => 'index',
+				'__NAMESPACE__' => 'Transactions\Controller',
+				'controller'    => 'TransactionExpense',
+				'action'        => 'add',
 			),
 		));
+		//$router->addRoute('account/default', $route);
 		$router->addRoute('foo', $route);
 	}
 	
+	public function checkAccess(MvcEvent $e)
+	{
+		$route = $e->getRouteMatch();
+		\Zend\Debug\Debug::dump($route, '123');
+		
+	}
+	
+	public function initAcl(MvcEvent $e)
+	{
+		echo __CLASS__;
+	}
 	
 }

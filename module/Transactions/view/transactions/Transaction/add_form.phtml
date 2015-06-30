@@ -103,7 +103,7 @@
 		$('body').on('input', ".currency:not('.complite')", function(){
 			var currency = $(this);
 			clearTimeout(currency_timeId);
-			currency_timeId = setTimeout(function(){new_transaction(500); currency.addClass('complite')},4000)	
+			currency_timeId = setTimeout(function(){new_transaction(500); currency.addClass('complite')},3000)	
 		});
 		
 		$('#transaction_block form').submit(function(){
@@ -123,6 +123,8 @@
 			});
 			autocompleteCommentInit($(this));	
 		});
+		
+		$('#transaction_block form input.date').click();
 		
 	});
 	

@@ -20,7 +20,7 @@ class IndexController extends AbstractActionController
 		$this->layout()->setVariable('title', 'Мой капитал');
 		
 		$view = new ViewModel(array(
-            'message' => 'Hello world',
+            'message' => 'Hello <br> world',
         ));
  
         return $view;

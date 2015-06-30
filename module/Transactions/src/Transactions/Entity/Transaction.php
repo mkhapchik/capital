@@ -35,7 +35,11 @@ class Transaction
 	*/	
 	public function exchangeArray($data)
 	{
-		foreach($data as $var=>$value) $this->$var = $value;
+		foreach($data as $var=>$value) 
+		{
+			if($var=='date') $this->$var = date('Y-m-d', strtotime($value));
+			else $this->$var = $value;
+		}
 		if(!array_key_exists('id', $data)) $this->id = false;
 	}
 }

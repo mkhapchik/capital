@@ -11,7 +11,8 @@ return array(
         'ZFTool',
         'Account',
         'Categories',
-        'Transactions'
+        'Transactions',
+		'Reports'
         ),
     'module_listener_options' => array(
         'module_paths' => array(
