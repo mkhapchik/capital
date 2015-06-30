@@ -86,13 +86,13 @@ class Module
 	public function checkAccess(MvcEvent $e)
 	{
 		$route = $e->getRouteMatch();
-		\Zend\Debug\Debug::dump($route, '123');
+		//\Zend\Debug\Debug::dump($route, '123');
 		
 	}
 	
 	public function initAcl(MvcEvent $e)
 	{
-		echo __CLASS__;
+		//echo __CLASS__;
 	}
 	
 }
