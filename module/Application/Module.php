@@ -61,11 +61,7 @@ class Module
 
 		$eventManager->attach(MvcEvent::EVENT_ROUTE, array($this, 'addRoutes'), 2);
 		
-		
 		$eventManager->attach(MvcEvent::EVENT_ROUTE, array($this, 'checkAccess'));
-		
-		
-		
     }
 	
 	public function addRoutes(MvcEvent $e)
