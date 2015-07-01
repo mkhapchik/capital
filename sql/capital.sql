@@ -1,7 +1,7 @@
 ﻿--
--- Скрипт сгенерирован Devart dbForge Studio for MySQL, Версия 6.3.341.0
+-- Скрипт сгенерирован Devart dbForge Studio for MySQL, Версия 6.3.358.0
 -- Домашняя страница продукта: http://www.devart.com/ru/dbforge/mysql/studio
--- Дата скрипта: 11.06.2015 16:11:01
+-- Дата скрипта: 30.06.2015 16:55:27
 -- Версия сервера: 5.5.23
 -- Версия клиента: 4.1
 --
@@ -22,9 +22,15 @@
 --
 SET NAMES 'utf8';
 
+-- 
+-- Установка базы данных по умолчанию
+--
+USE capital;
+
 --
 -- Описание для таблицы account
 --
+DROP TABLE IF EXISTS account;
 CREATE TABLE account (
   id BIGINT(20) NOT NULL AUTO_INCREMENT,
   name VARCHAR(50) NOT NULL COMMENT 'Название счета',
@@ -35,7 +41,7 @@ CREATE TABLE account (
   PRIMARY KEY (id)
 )
 ENGINE = INNODB
-AUTO_INCREMENT = 3
+AUTO_INCREMENT = 5
 AVG_ROW_LENGTH = 16384
 CHARACTER SET utf8
 COLLATE utf8_general_ci
@@ -44,6 +50,7 @@ COMMENT = 'Счета';
 --
 -- Описание для таблицы categories
 --
+DROP TABLE IF EXISTS categories;
 CREATE TABLE categories (
   id BIGINT(20) NOT NULL AUTO_INCREMENT,
   name VARCHAR(50) DEFAULT NULL COMMENT 'Название категории',
@@ -55,8 +62,8 @@ CREATE TABLE categories (
   PRIMARY KEY (id)
 )
 ENGINE = INNODB
-AUTO_INCREMENT = 14
-AVG_ROW_LENGTH = 1365
+AUTO_INCREMENT = 16
+AVG_ROW_LENGTH = 8192
 CHARACTER SET cp1251
 COLLATE cp1251_general_ci
 COMMENT = 'Категории расхода и дохода';
@@ -64,6 +71,7 @@ COMMENT = 'Категории расхода и дохода';
 --
 -- Описание для таблицы menu
 --
+DROP TABLE IF EXISTS menu;
 CREATE TABLE menu (
   id INT(11) NOT NULL AUTO_INCREMENT,
   name VARCHAR(50) NOT NULL,
@@ -74,8 +82,8 @@ CREATE TABLE menu (
   PRIMARY KEY (id)
 )
 ENGINE = INNODB
-AUTO_INCREMENT = 6
-AVG_ROW_LENGTH = 3276
+AUTO_INCREMENT = 7
+AVG_ROW_LENGTH = 2730
 CHARACTER SET cp1251
 COLLATE cp1251_general_ci
 COMMENT = 'Меню';
@@ -83,6 +91,7 @@ COMMENT = 'Меню';
 --
 -- Описание для таблицы tasks
 --
+DROP TABLE IF EXISTS tasks;
 CREATE TABLE tasks (
   id BIGINT(20) NOT NULL AUTO_INCREMENT,
   date DATE NOT NULL COMMENT 'Дата задания',
@@ -103,6 +112,7 @@ COMMENT = 'Задачи для автоматических транзакций
 --
 -- Описание для таблицы arrears
 --
+DROP TABLE IF EXISTS arrears;
 CREATE TABLE arrears (
   id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
   lender VARCHAR(255) DEFAULT NULL COMMENT 'кредитор',
@@ -126,6 +136,7 @@ COMMENT = 'Долги';
 --
 -- Описание для таблицы plan
 --
+DROP TABLE IF EXISTS plan;
 CREATE TABLE plan (
   id BIGINT(20) NOT NULL AUTO_INCREMENT,
   name VARCHAR(50) DEFAULT NULL COMMENT 'Наименование',
@@ -149,6 +160,7 @@ COMMENT = 'Планируемые покупки';
 --
 -- Описание для таблицы transactions
 --
+DROP TABLE IF EXISTS transactions;
 CREATE TABLE transactions (
   id BIGINT(20) NOT NULL AUTO_INCREMENT,
   date DATE NOT NULL COMMENT 'дата операции',
@@ -164,8 +176,8 @@ CREATE TABLE transactions (
     REFERENCES categories(id) ON DELETE NO ACTION ON UPDATE NO ACTION
 )
 ENGINE = INNODB
-AUTO_INCREMENT = 60
-AVG_ROW_LENGTH = 309
+AUTO_INCREMENT = 11
+AVG_ROW_LENGTH = 5461
 CHARACTER SET cp1251
 COLLATE cp1251_general_ci
 COMMENT = 'Операции по счетам';
@@ -175,6 +187,7 @@ DELIMITER $$
 --
 -- Описание для процедуры auto_transaction
 --
+DROP PROCEDURE IF EXISTS auto_transaction$$
 CREATE PROCEDURE auto_transaction(IN p_id bigint(20))
   SQL SECURITY INVOKER
   COMMENT 'Автоматическая транзакция - исполнение задания'
@@ -193,34 +206,66 @@ $$
 --
 -- Описание для процедуры getOverflow
 --
+DROP PROCEDURE IF EXISTS getOverflow$$
 CREATE PROCEDURE getOverflow(IN p_date date, IN p_category_type INT)
   SQL SECURITY INVOKER
   COMMENT 'Переполнение за указанный месяц'
 BEGIN
   DECLARE v_date_from DATE;
   DECLARE v_date_to DATE;
+  DECLARE v_date_start varchar(10); 
+  DECLARE v_date_end varchar(10);
 
   IF(p_date IS NULL) THEN
-   SET p_date = CURRENT_DATE();
+    -- SET v_date_start = DATE_FORMAT(0 ,'%Y-%m-01 00.00.00');
+    SET v_date_start = CURRENT_DATE();
+    SET v_date_end = LAST_DAY(CURRENT_DATE());
+  ELSE
+    -- SET v_date_start = DATE_FORMAT(p_date ,'%Y-%m-01 00.00.00');
+    SET v_date_start = p_date;
+    SET v_date_end = LAST_DAY(p_date);
   END IF;
 
-  SET v_date_from = DATE_FORMAT(p_date ,'%Y-%m-01 00.00.00');
-  SET v_date_to = LAST_DAY(p_date);
-
   IF p_category_type IS NULL THEN
+    /*
     SELECT c.id, c.type, c.statistic, c.name, c.amount_limit, ABS(SUM(t.amount*t.op_sign)) AS sum, ABS(SUM(t.amount*t.op_sign))-c.amount_limit AS overflow
     FROM categories c 
     LEFT JOIN transactions t ON c.id=t.categories_id 
-    WHERE ((t.date>=DATE_FORMAT(p_date ,'%Y-%m-01 00.00.00') AND t.date<LAST_DAY(p_date)) OR t.date IS NULL)  AND c.f_deleted=0
+    WHERE ((t.date>=v_date_start AND t.date<v_date_end) OR t.date IS NULL)  AND c.f_deleted=0
     GROUP BY c.id
     ORDER BY c.statistic DESC;
+    */
+    SELECT c.id, c.type, c.statistic, c.name, c.amount_limit, 
+  (SELECT ABS(SUM(t.amount*t.op_sign)) FROM transactions t 
+    WHERE t.categories_id=c.id AND t.date>=v_date_start 
+    AND t.date<v_date_end
+  ) AS sum, 
+  (SELECT ABS(SUM(t.amount*t.op_sign))-c.amount_limit FROM  transactions t
+    WHERE t.categories_id=c.id AND t.date>=v_date_start 
+    AND t.date<v_date_end 
+  ) AS overflow  
+  FROM categories c WHERE c.f_deleted=0 ORDER BY c.statistic DESC;
+  
   ELSE
+    
+    /*
     SELECT c.id, c.type, c.statistic, c.name, c.amount_limit, ABS(SUM(t.amount*t.op_sign)) AS sum, ABS(SUM(t.amount*t.op_sign))-c.amount_limit AS overflow
     FROM categories c 
     LEFT JOIN transactions t ON c.id=t.categories_id 
-    WHERE ((t.date>=DATE_FORMAT(p_date ,'%Y-%m-01 00.00.00') AND t.date<LAST_DAY(p_date)) OR t.date IS NULL) AND c.type=p_category_type AND c.f_deleted=0
+    WHERE ((t.date>=v_date_start AND t.date<v_date_end) OR t.date IS NULL) AND c.type=p_category_type AND c.f_deleted=0
     GROUP BY c.id
     ORDER BY c.statistic DESC;
+*/
+SELECT c.id, c.type, c.statistic, c.name, c.amount_limit, 
+  (SELECT ABS(SUM(t.amount*t.op_sign)) FROM transactions t 
+    WHERE t.categories_id=c.id AND t.date>=v_date_start 
+    AND t.date<v_date_end
+  ) AS sum, 
+  (SELECT ABS(SUM(t.amount*t.op_sign))-c.amount_limit FROM  transactions t
+    WHERE t.categories_id=c.id AND t.date>=v_date_start 
+    AND t.date<v_date_end 
+  ) AS overflow  
+  FROM categories c WHERE c.f_deleted=0 AND c.type=p_category_type ORDER BY c.statistic DESC;
 END IF;
 
 
@@ -230,6 +275,7 @@ $$
 --
 -- Описание для процедуры transactions
 --
+DROP PROCEDURE IF EXISTS transactions$$
 CREATE PROCEDURE transactions(IN p_date DATE, IN p_amount DECIMAL(8,2), IN p_categories_id bigint(20), IN p_account_id bigint(20), IN p_comment varchar(500))
   SQL SECURITY INVOKER
   COMMENT 'Добавление дохода или расхода'
@@ -270,6 +316,7 @@ $$
 --
 -- Описание для процедуры update_accounts
 --
+DROP PROCEDURE IF EXISTS update_accounts$$
 CREATE DEFINER = 'root'@'localhost'
 PROCEDURE update_accounts(IN p_account_id bigint(20))
   COMMENT 'Обновление счета'
@@ -291,6 +338,7 @@ $$
 --
 -- Описание для процедуры update_statistic
 --
+DROP PROCEDURE IF EXISTS update_statistic$$
 CREATE PROCEDURE update_statistic()
   SQL SECURITY INVOKER
   COMMENT 'Обновление статистики категории'
@@ -327,116 +375,6 @@ END
 $$
 
 DELIMITER ;
-
--- 
--- Вывод данных для таблицы account
---
-INSERT INTO account VALUES
-(1, 'Наличные', 127710.00, 'Тестовый счет', 1, 79),
-(2, 'Карта', 638.00, 'Карта для накопления на яхту', 1, 23);
-
--- 
--- Вывод данных для таблицы categories
---
-INSERT INTO categories VALUES
-(1, 'Категория дохода12', 1, 63, NULL, 0, NULL),
-(2, 'Категория расхода', 0, NULL, 5000, 0, NULL),
-(4, 'Категория расхода 2', 0, 72, 8000, 0, NULL),
-(5, 'Категория дохода 2', 1, 37, NULL, 0, NULL),
-(6, 'еуые', 1, 0, 0, 1, NULL),
-(7, 'test', 1, 0, 0, 1, NULL),
-(8, 'test3333333', 1, 0, NULL, 1, NULL),
-(9, 'test2', 1, 0, 0, 1, NULL),
-(10, 'test', 1, 0, NULL, 1, NULL),
-(11, 'test', 0, 0, 121, 1, NULL),
-(12, 'test', 1, NULL, NULL, 0, NULL),
-(13, 'test2', 0, NULL, 0, 1, NULL);
-
--- 
--- Вывод данных для таблицы menu
---
-INSERT INTO menu VALUES
-(1, 'account', 'Счета', 'account/default', '3', '1'),
-(2, 'income', 'Категории дохода', 'categories/income', '4', '1'),
-(3, 'expense', 'Категории расхода', 'categories/expense', '5', '1'),
-(4, 'transactions_income', 'Доходы', 'transactions/income', '2', '1'),
-(5, 'transactions_expense', 'Расходы', 'transactions/expense', '1', '1');
-
--- 
--- Вывод данных для таблицы tasks
---
-
--- Таблица capital.tasks не содержит данных
-
--- 
--- Вывод данных для таблицы arrears
---
-
--- Таблица capital.arrears не содержит данных
-
--- 
--- Вывод данных для таблицы plan
---
-
--- Таблица capital.plan не содержит данных
-
--- 
--- Вывод данных для таблицы transactions
---
-INSERT INTO transactions VALUES
-(1, '2015-03-13', 100.00, 2, 1, 'тест расхода', -1),
-(2, '2015-03-13', 1000.00, 1, 1, 'тест доход', 1),
-(3, '2015-03-13', 200.00, 4, 1, NULL, -1),
-(5, '2015-03-13', 500.00, 1, 1, NULL, 1),
-(6, '2015-03-13', 100.00, 4, 1, NULL, -1),
-(7, '2015-03-13', 3000.00, 1, 1, 'ttt', 1),
-(8, '2015-03-13', 3000.00, 1, 1, 'ttt', 1),
-(9, '2015-03-13', 1000.00, 2, 1, 'ttt', -1),
-(10, '2015-03-13', 1000.00, 5, 1, 'ttt', 1),
-(11, '2015-03-13', 300.00, 2, 1, 'ttt', -1),
-(12, '2015-03-13', 300.00, 2, 1, 'ttt', -1),
-(13, '2015-03-13', 300.00, 2, 1, 'ttt', -1),
-(14, '2015-03-13', 300.00, 4, 1, 'ttt', -1),
-(15, '2015-03-13', 1.00, 4, 1, 'ttt', -1),
-(16, '2015-03-13', 1000.00, 4, 1, 'ttt', -1),
-(17, '2015-03-13', 1000.00, 4, 1, 'ttt', -1),
-(18, '2015-03-13', 1000.00, 4, 1, 'ttt', -1),
-(19, '2015-03-13', 1000.00, 4, 1, 'ttt', -1),
-(20, '2015-03-13', 1000.00, 4, 1, 'ttt', -1),
-(21, '2015-03-13', 1000.00, 4, 1, 'ttt', -1),
-(22, '2015-03-13', 1000.00, 4, 1, 'ttt', -1),
-(23, '2005-06-20', 555.00, 5, 1, 'test1', 1),
-(24, '2005-06-20', 666.00, 5, 1, 'test2', 1),
-(25, '2005-06-20', 666.00, 5, 1, 'test2', 1),
-(26, '2005-06-20', 666.00, 5, 1, 'test2', 1),
-(27, '2005-06-20', 777.00, 1, 2, 'test2', 1),
-(28, '2009-06-20', 1235.00, 1, 1, 'Очень длинный комментарий про очень длинную информацию', 1),
-(29, '2009-06-20', 120.00, 1, 1, '', 1),
-(30, '2009-06-20', 50.00, 5, 1, '', 1),
-(36, '2010-06-20', 1000.00, 4, 2, '', -1),
-(37, '2011-06-20', 123.00, 1, 2, 'Лента', 1),
-(38, '2011-06-20', 123.00, 5, 2, 'Лента', 1),
-(39, '2011-06-20', 500.00, 1, 1, 'Лента', 1),
-(40, '2011-06-20', 123.00, 1, 1, '', 1),
-(41, '2011-06-20', 123.00, 5, 1, '', 1),
-(42, '2011-06-20', 123.00, 5, 1, '', 1),
-(43, '2011-06-20', 0.00, 1, 1, '', 1),
-(44, '2011-06-20', 123.00, 1, 1, '', 1),
-(45, '2011-06-20', 123.00, 1, 1, '', 1),
-(46, '2011-06-20', 123.00, 1, 2, '', 1),
-(47, '2011-06-20', 123.00, 1, 1, '', 1),
-(48, '2011-06-20', 0.00, 1, 2, '', 1),
-(49, '2011-06-20', 123.00, 5, 1, '', 1),
-(50, '2011-06-20', 123.00, 5, 1, '', 1),
-(51, '2011-06-20', 123.00, 1, 2, '', 1),
-(52, '2011-06-20', 123.00, 1, 2, '', 1),
-(53, '2011-06-20', 123.00, 1, 2, '', 1),
-(54, '2011-06-20', 123.00, 1, 2, '', 1),
-(55, '2011-06-20', 123123.00, 1, 1, '', 1),
-(56, '2011-06-20', 123.00, 5, 1, '', 1),
-(57, '2011-06-20', 123.00, 1, 2, '', 1),
-(58, '2011-06-20', 123.00, 5, 1, '', 1),
-(59, '2011-06-20', 123.00, 4, 2, '', -1);
 
 -- 
 -- Восстановить предыдущий режим SQL (SQL mode)
