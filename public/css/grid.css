@@ -71,19 +71,29 @@ footer{
 	position: absolute;
 	bottom:0;
 }
-@media(max-width: 1200px) {
+@media(max-width: 1280px) {
 	.main{
-		width:100%;
-		padding: 3% 0;
+		width:94%;
+		padding: 3% 3%;
 	}
 	
 	.full_screen{
 		margin: 0!important;
 	}
 	
+	
+}
+
+@media(max-width: 1000px){
+	.main{
+		width:100%;
+		padding: 3% 0;
+	}
+	
 	.full_screen .body{
 		padding: 2px !important;
 	}
+	
 }
 .block{
 	display:block;

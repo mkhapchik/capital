@@ -193,7 +193,7 @@ img.ui-datepicker-trigger{
 	border-color:#cd0a0a !important;
 }
 
-@media(max-width: 1200px) {
+@media(max-width: 1280px) {
 	.full_screen .form_element{
 		padding: 5px 3px !important;
 	}
@@ -202,11 +202,15 @@ img.ui-datepicker-trigger{
 		margin-right:5px !important;
 	}
 
-	.full_screen .form_element select{
-		width:150px!important;
-	}
+	
 
 	.full_screen  .remove{
 		margin: 5px 0!important;
+	}
+}
+
+@media(max-width: 1000px){
+	.full_screen .form_element select{
+		 width:160px!important; 
 	}
 }
