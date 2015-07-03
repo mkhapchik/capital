@@ -192,23 +192,3 @@ img.ui-datepicker-trigger{
 .b-form .input-error{
 	border-color:#cd0a0a !important;
 }
-
-
-@media(max-width: 1200px) {
-	
-	.full_screen .form_element{
-		padding: 5px 3px !important;
-	}
-	
-	.full_screen .form_element span{
-		margin-right:5px !important;
-	}
-	
-	.full_screen .form_element select{
-		width:150px!important;
-	}
-	
-	.full_screen  .remove{
-		margin: 5px 0!important;
-	}
-}
