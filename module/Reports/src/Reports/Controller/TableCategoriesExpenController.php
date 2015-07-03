@@ -13,8 +13,8 @@ class TableCategoriesExpenController extends AbstractActionController
 		$report_table = array();
 		
 		$params = $this->params()->fromQuery();
-		$start 	= $params['start'] 	? 	strtotime($params['start']) : 	strtotime(date('Y-m-1') . "- 1 month");
-		$end 	= $params['end'] 	?	strtotime($params['end'])	:	strtotime("now");
+		$start 	= isset($params['start']) && !empty($params['start']) 	? 	strtotime($params['start']) : 	strtotime(date('Y-m-1') . "- 1 month");
+		$end 	= isset($params['end'] 	) && !empty($params['end'])		?	strtotime($params['end'])	:	strtotime("now");
 				
 		$year_start = date('Y', $start);
 		$month_start = date('n', $start);

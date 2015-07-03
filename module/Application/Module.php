@@ -53,15 +53,19 @@ class Module
 	*/
 	public function onBootstrap(MvcEvent $e)
     {
-		$this->initAcl($e);
+		//$this->initAcl($e);
 		
 		$eventManager        = $e->getApplication()->getEventManager();
 		$moduleRouteListener = new ModuleRouteListener();
         $moduleRouteListener->attach($eventManager);
 
-		$eventManager->attach(MvcEvent::EVENT_ROUTE, array($this, 'addRoutes'), 2);
+		//$eventManager->attach(MvcEvent::EVENT_ROUTE, array($this, 'addRoutes'), 2);
 		
-		$eventManager->attach(MvcEvent::EVENT_ROUTE, array($this, 'checkAccess'));
+		
+		//$eventManager->attach(MvcEvent::EVENT_ROUTE, array($this, 'checkAccess'));
+		
+		
+		
     }
 	
 	public function addRoutes(MvcEvent $e)
@@ -82,13 +86,13 @@ class Module
 	public function checkAccess(MvcEvent $e)
 	{
 		$route = $e->getRouteMatch();
-		//\Zend\Debug\Debug::dump($route, '123');
+		\Zend\Debug\Debug::dump($route, '123');
 		
 	}
 	
 	public function initAcl(MvcEvent $e)
 	{
-		//echo __CLASS__;
+		echo __CLASS__;
 	}
 	
 }
