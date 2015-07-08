@@ -97,13 +97,26 @@
 		
 	}
 	
+	function currency_eval(currency)
+	{
+		var val = currency.val().replace(/[,]+/g,'.');
+		currency.val(eval(val));
+	}
+	
 	$(document).ready(function(){
 		//new_transaction();
 		var currency_timeId;
 		$('body').on('input', ".currency:not('.complite')", function(){
 			var currency = $(this);
 			clearTimeout(currency_timeId);
-			currency_timeId = setTimeout(function(){new_transaction(500); currency.addClass('complite')},3000)	
+			currency_timeId = setTimeout(function(){
+				new_transaction(500); 
+				currency.addClass('complite');
+			},3000)	
+		});
+		
+		$('body').on('blur', ".currency", function(){
+			currency_eval($(this));
 		});
 		
 		$('#transaction_block form').submit(function(){
