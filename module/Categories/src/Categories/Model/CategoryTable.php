@@ -24,12 +24,17 @@ class CategoryTable extends AbstractTableGateway implements AdapterAwareInterfac
 		$this->initialize();
     }
  
-    public function fetchAll($date=false)
+    public function fetchAll($date_start=false, $date_end=false)
     {
-		if($date===false) $date = "DATE_FORMAT(CURRENT_DATE() ,'%Y-%m-01 00.00.00')";
-		else $date = in_array($date, array('null', 'CURRENT_DATE()')) ? $date : "'$date'";
+		//if($date===false) $date = "DATE_FORMAT(CURRENT_DATE() ,'%Y-%m-01 00.00.00')";
+		//else $date = in_array($date, array('null', 'CURRENT_DATE()')) ? $date : "'$date'";
+		if($date_start===false) $date_start='null';
+		else $date_start = "'$date_start'";
 		
-		$query = "CALL getOverflow($date, {$this->type})";
+		if($date_end===false) $date_end='null';
+		else $date_end = "'$date_end'";
+		
+		$query = "CALL getOverflow($date_start, $date_end, {$this->type})";
 		$r = $this->adapter->query($query, Adapter::QUERY_MODE_EXECUTE);
 		
 		$result = $r->toArray();

@@ -34,11 +34,16 @@ class TableCategoriesExpenController extends AbstractActionController
 			
 			for($m=$m_start; $m<=$m_end; $m++)
 			{
-				if($y==$year_start && $m==$month_start) $day = $day_start;
-				else if($y==$year_end && $m==$month_end) $day = $day_end;
-				else $day ='01';
+				$d_start = '01';
+				$d_end = false;
 				
-				$report_table[$y][$m] = $categoryTable->fetchAll("$y-$m-$day");
+				if($y==$year_start && $m==$month_start) $d_start = $day_start;
+				else if($y==$year_end && $m==$month_end)$d_end = $day_end;
+												
+				$result_start = "$y-$m-$d_start";
+				$result_end   = $d_end ? "$y-$m-$d_end" : 'null';
+				
+				$report_table[$y][$m] = $categoryTable->fetchAll($result_start, $result_end);
 			}
 		}
 		

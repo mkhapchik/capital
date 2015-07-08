@@ -207,63 +207,50 @@ $$
 -- Описание для процедуры getOverflow
 --
 DROP PROCEDURE IF EXISTS getOverflow$$
-CREATE PROCEDURE getOverflow(IN p_date date, IN p_category_type INT)
+CREATE PROCEDURE getOverflow(IN p_date_start date, IN p_date_end date, IN p_category_type INT)
   SQL SECURITY INVOKER
-  COMMENT 'Переполнение за указанный месяц'
+  COMMENT 'Переполнение за указанный период'
 BEGIN
   DECLARE v_date_from DATE;
   DECLARE v_date_to DATE;
   DECLARE v_date_start varchar(10); 
   DECLARE v_date_end varchar(10);
 
-  IF(p_date IS NULL) THEN
-    -- SET v_date_start = DATE_FORMAT(0 ,'%Y-%m-01 00.00.00');
-    SET v_date_start = CURRENT_DATE();
-    SET v_date_end = LAST_DAY(CURRENT_DATE());
+  IF(p_date_start IS NULL) THEN
+    SET v_date_start = DATE_FORMAT(CURRENT_DATE() ,'%Y-%m-01 00.00.00');
   ELSE
-    -- SET v_date_start = DATE_FORMAT(p_date ,'%Y-%m-01 00.00.00');
-    SET v_date_start = p_date;
-    SET v_date_end = LAST_DAY(p_date);
+    SET v_date_start = p_date_start;
+  END IF;
+
+  IF(p_date_end IS NULL) THEN
+    SET v_date_end = LAST_DAY(v_date_start);
+  ELSE
+    SET v_date_end = p_date_end;
   END IF;
 
   IF p_category_type IS NULL THEN
-    /*
-    SELECT c.id, c.type, c.statistic, c.name, c.amount_limit, ABS(SUM(t.amount*t.op_sign)) AS sum, ABS(SUM(t.amount*t.op_sign))-c.amount_limit AS overflow
-    FROM categories c 
-    LEFT JOIN transactions t ON c.id=t.categories_id 
-    WHERE ((t.date>=v_date_start AND t.date<v_date_end) OR t.date IS NULL)  AND c.f_deleted=0
-    GROUP BY c.id
-    ORDER BY c.statistic DESC;
-    */
+    
     SELECT c.id, c.type, c.statistic, c.name, c.amount_limit, 
   (SELECT ABS(SUM(t.amount*t.op_sign)) FROM transactions t 
     WHERE t.categories_id=c.id AND t.date>=v_date_start 
-    AND t.date<v_date_end
+    AND t.date<=v_date_end
   ) AS sum, 
   (SELECT ABS(SUM(t.amount*t.op_sign))-c.amount_limit FROM  transactions t
     WHERE t.categories_id=c.id AND t.date>=v_date_start 
-    AND t.date<v_date_end 
+    AND t.date<=v_date_end 
   ) AS overflow  
   FROM categories c WHERE c.f_deleted=0 ORDER BY c.statistic DESC;
   
   ELSE
     
-    /*
-    SELECT c.id, c.type, c.statistic, c.name, c.amount_limit, ABS(SUM(t.amount*t.op_sign)) AS sum, ABS(SUM(t.amount*t.op_sign))-c.amount_limit AS overflow
-    FROM categories c 
-    LEFT JOIN transactions t ON c.id=t.categories_id 
-    WHERE ((t.date>=v_date_start AND t.date<v_date_end) OR t.date IS NULL) AND c.type=p_category_type AND c.f_deleted=0
-    GROUP BY c.id
-    ORDER BY c.statistic DESC;
-*/
 SELECT c.id, c.type, c.statistic, c.name, c.amount_limit, 
   (SELECT ABS(SUM(t.amount*t.op_sign)) FROM transactions t 
     WHERE t.categories_id=c.id AND t.date>=v_date_start 
-    AND t.date<v_date_end
+    AND t.date<=v_date_end
   ) AS sum, 
   (SELECT ABS(SUM(t.amount*t.op_sign))-c.amount_limit FROM  transactions t
     WHERE t.categories_id=c.id AND t.date>=v_date_start 
-    AND t.date<v_date_end 
+    AND t.date<=v_date_end 
   ) AS overflow  
   FROM categories c WHERE c.f_deleted=0 AND c.type=p_category_type ORDER BY c.statistic DESC;
 END IF;
