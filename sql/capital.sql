@@ -1,7 +1,7 @@
 ﻿--
--- Скрипт сгенерирован Devart dbForge Studio for MySQL, Версия 6.3.358.0
+-- Скрипт сгенерирован Devart dbForge Studio for MySQL, Версия 6.2.280.0
 -- Домашняя страница продукта: http://www.devart.com/ru/dbforge/mysql/studio
--- Дата скрипта: 30.06.2015 16:55:27
+-- Дата скрипта: 09.07.2015 19:14:26
 -- Версия сервера: 5.5.23
 -- Версия клиента: 4.1
 --
@@ -41,7 +41,7 @@ CREATE TABLE account (
   PRIMARY KEY (id)
 )
 ENGINE = INNODB
-AUTO_INCREMENT = 5
+AUTO_INCREMENT = 8
 AVG_ROW_LENGTH = 16384
 CHARACTER SET utf8
 COLLATE utf8_general_ci
@@ -62,8 +62,8 @@ CREATE TABLE categories (
   PRIMARY KEY (id)
 )
 ENGINE = INNODB
-AUTO_INCREMENT = 16
-AVG_ROW_LENGTH = 8192
+AUTO_INCREMENT = 35
+AVG_ROW_LENGTH = 1365
 CHARACTER SET cp1251
 COLLATE cp1251_general_ci
 COMMENT = 'Категории расхода и дохода';
@@ -83,7 +83,7 @@ CREATE TABLE menu (
 )
 ENGINE = INNODB
 AUTO_INCREMENT = 7
-AVG_ROW_LENGTH = 2730
+AVG_ROW_LENGTH = 3276
 CHARACTER SET cp1251
 COLLATE cp1251_general_ci
 COMMENT = 'Меню';
@@ -176,8 +176,8 @@ CREATE TABLE transactions (
     REFERENCES categories(id) ON DELETE NO ACTION ON UPDATE NO ACTION
 )
 ENGINE = INNODB
-AUTO_INCREMENT = 11
-AVG_ROW_LENGTH = 5461
+AUTO_INCREMENT = 42
+AVG_ROW_LENGTH = 309
 CHARACTER SET cp1251
 COLLATE cp1251_general_ci
 COMMENT = 'Операции по счетам';
@@ -287,7 +287,7 @@ BEGIN
   
   SET v_lastId = LAST_INSERT_ID();
   
-  CALL update_accounts(p_account_id);
+  CALL update_accounts(p_account_id, p_amount*v_op_sign);
   CALL update_statistic();
 
   /* Сделать процедуру подсчета превышений по каждому лимиту
@@ -305,7 +305,7 @@ $$
 --
 DROP PROCEDURE IF EXISTS update_accounts$$
 CREATE DEFINER = 'root'@'localhost'
-PROCEDURE update_accounts(IN p_account_id bigint(20))
+PROCEDURE update_accounts(IN p_account_id bigint(20), IN p_amount DECIMAL(8,2))
   COMMENT 'Обновление счета'
 BEGIN
   DECLARE v_count int;
@@ -313,12 +313,21 @@ BEGIN
   DECLARE v_percent int;
   DECLARE v_amount decimal(8,2);
    
+  /*
   SELECT SUM(t.amount*t.op_sign),COUNT(id) INTO v_amount,v_count FROM transactions t WHERE t.account_id=p_account_id;      
   SELECT COUNT(id) INTO v_total FROM transactions;
    
   SET v_percent = (v_count/v_total) * 100;
     
   UPDATE account a SET a.amount=v_amount, a.statistic=v_percent WHERE a.id=p_account_id;
+  */
+
+  SELECT COUNT(id) INTO v_count FROM transactions t WHERE t.account_id=p_account_id;      
+  SELECT COUNT(id) INTO v_total FROM transactions;
+   
+  SET v_percent = (v_count/v_total) * 100;
+    
+  UPDATE account a SET a.amount=a.amount+p_amount, a.statistic=v_percent WHERE a.id=p_account_id;
 END
 $$
 
