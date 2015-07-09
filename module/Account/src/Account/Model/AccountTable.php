@@ -21,7 +21,13 @@ class AccountTable extends AbstractTableGateway implements AdapterAwareInterface
  
     public function fetchAll()
     {
-        $resultSet = $this->select(array('f_deleted'=>0));
+        $resultSet = $this->select(function (Select $select) {
+			$select->where->equalTo('f_deleted', 0);
+			$select->order('statistic DESC');
+		});
+		
+		
+		
 		$resultSet->setObjectPrototype(new Account());
        	return $resultSet;
     }
