@@ -38,7 +38,7 @@ class TableCategoriesExpenController extends AbstractActionController
 				$d_end = false;
 				
 				if($y==$year_start && $m==$month_start) $d_start = $day_start;
-				else if($y==$year_end && $m==$month_end)$d_end = $day_end;
+				if($y==$year_end && $m==$month_end)$d_end = $day_end;
 												
 				$result_start = "$y-$m-$d_start";
 				$result_end   = $d_end ? "$y-$m-$d_end" : 'null';
