@@ -96,13 +96,13 @@
 		}
 		
 	}
-	
+	/*
 	function currency_eval(currency)
 	{
 		var val = currency.val().replace(/[,]+/g,'.');
 		currency.val(eval(val));
 	}
-	
+	*/
 	$(document).ready(function(){
 		//new_transaction();
 		var currency_timeId;
@@ -114,11 +114,11 @@
 				currency.addClass('complite');
 			},3000)	
 		});
-		
+		/*
 		$('body').on('blur', ".currency", function(){
 			currency_eval($(this));
 		});
-		
+		*/
 		$('#transaction_block form').submit(function(){
 			var last_group = $(this).find(".group:last");
 			if(	last_group.find('.currency').val()=='' && last_group.find('.categories').val()=='' && last_group.find('.account').val()=='')

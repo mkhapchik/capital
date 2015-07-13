@@ -18,10 +18,19 @@ $(document).ready(function(){
 		setSelectStyle($(this));
 	});
 	
+	$('body').on('blur', ".currency", function(){
+		currency_eval($(this));
+	});
 });
 
 function setSelectStyle(sel)
 {
 	if(sel.val().length==0) sel.addClass('empty');
 	else sel.removeClass('empty');
+}
+
+function currency_eval(currency)
+{
+	var val = currency.val().replace(/[,]+/g,'.');
+	currency.val(eval(val));
 }
