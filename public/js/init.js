@@ -31,6 +31,10 @@ function setSelectStyle(sel)
 
 function currency_eval(currency)
 {
-	var val = currency.val().replace(/[,]+/g,'.');
-	currency.val(eval(val));
+	var val = eval(currency.val().replace(/[,]+/g,'.').replace(/[^0-9\.+-/*()]/g,'0'))+'';
+	
+	if(!(val.indexOf('.')+1)) val+='.00';
+	else if(val.indexOf('.')==val.length) val+='00';
+	
+	currency.val(val);
 }
