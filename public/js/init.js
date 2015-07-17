@@ -39,14 +39,10 @@ function currency_eval(currency)
 		val = val.replace(/[,]+/g,'.').replace(/[^0-9\.+-/*()]/g,'0');
 		dot_index = val.indexOf('.');
 		
-		if(dot_index==0) 
-		{
-			val = 0+val;
-			dot_index++;
-		}
-		
+		if(dot_index==0) val = 0+val;
+			
 		val = eval(val)+'';
-		
+		dot_index = val.indexOf('.');
 		val_length = val.length;
 		if((dot_index+1)==0) val+='.00';
 		else if((val_length-dot_index-1)==0) val+='00';
