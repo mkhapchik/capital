@@ -31,10 +31,28 @@ function setSelectStyle(sel)
 
 function currency_eval(currency)
 {
-	var val = eval(currency.val().replace(/[,]+/g,'.').replace(/[^0-9\.+-/*()]/g,'0'))+'';
-	
-	if(!(val.indexOf('.')+1)) val+='.00';
-	else if(val.indexOf('.')==val.length) val+='00';
+	var val, dot_index, val_length;
+	val = currency.val();
+	if(val)
+	{
+		
+		val = val.replace(/[,]+/g,'.').replace(/[^0-9\.+-/*()]/g,'0');
+		dot_index = val.indexOf('.');
+		
+		if(dot_index==0) 
+		{
+			val = 0+val;
+			dot_index++;
+		}
+		
+		val = eval(val)+'';
+		
+		val_length = val.length;
+		if((dot_index+1)==0) val+='.00';
+		else if((val_length-dot_index-1)==0) val+='00';
+		else if((val_length-dot_index-1)==1) val+='0';
+		
+	}
 	
 	currency.val(val);
 }
