@@ -7,12 +7,19 @@ use Zend\Db\TableGateway\AbstractTableGateway;
 use Zend\Db\Adapter\AdapterAwareInterface;
 use Categories\Model\Category;
 use Zend\Db\Sql\Select;
+use ArrayObject;
 
 abstract class AbstractTable extends AbstractTableGateway implements AdapterAwareInterface
 {
 	protected $table;
 	protected $adapter;
 	protected $connection;
+	protected $objectPrototype;
+	
+	protected function setObjectPrototype()
+	{
+		$this->objectPrototype = new ArrayObject();
+	}
 	
     public function setDbAdapter(Adapter $adapter)
     {
@@ -23,6 +30,8 @@ abstract class AbstractTable extends AbstractTableGateway implements AdapterAwar
 		
 		$driver = $this->adapter->getDriver();
 		$this->connection = $driver->getConnection();
+		
+		$this->setObjectPrototype();
     }
   
 	/**
@@ -31,6 +40,7 @@ abstract class AbstractTable extends AbstractTableGateway implements AdapterAwar
     public function fetchAll($where=null)
 	{
 		$resultSet = $this->select($where);
+		$resultSet->setObjectPrototype($this->objectPrototype);
 		return $resultSet->toArray();
 	}
     
@@ -43,7 +53,8 @@ abstract class AbstractTable extends AbstractTableGateway implements AdapterAwar
 	{
 		$id  = (int) $id;
         $rowset = $this->select(array('id' => $id));
-        $row = $rowset->current();
+        $rowset->setObjectPrototype($this->objectPrototype);
+		$row = $rowset->current();
         if (!$row) throw new \Exception("Could not find row $id");
         
         return $row;

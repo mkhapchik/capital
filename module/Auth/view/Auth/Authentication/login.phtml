@@ -3,9 +3,13 @@
 	<h1>Аутентификация</h1>
 	</header>
 	<div class="body">
-
+	<?php if($err_message):?>
+		<div class="error"><?=$err_message;?></div>
+	<?php endif;?>
+	
 	<?php
 	$form = $this->form;
+	
 //	$form->setAttribute('action', '/categories/income/add');
 	$form->prepare();
 	echo $this->form()->openTag($form);

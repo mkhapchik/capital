@@ -1,6 +1,8 @@
 <?php
 namespace Auth;
 
+use Auth\Model\UserTable;
+
 class Module
 {
     public function getConfig()
@@ -23,8 +25,13 @@ class Module
 	{
 		return array(
 			'factories' => array(
-				
+				'UserTable' => function ($sm) {
+					$userTable =  new UserTable();
+					return $userTable;
+				}
 			),
 		);
 	}
+	
+	
 }

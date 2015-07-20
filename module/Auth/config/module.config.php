@@ -1,5 +1,7 @@
 <?php
 return array(
+	'max_counter_failures'=>3,
+	
 	'controllers' => array(
         'invokables' => array(
             'Auth\Controller\Authentication' => 'Auth\Controller\AuthenticationController',	
