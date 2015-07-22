@@ -2,6 +2,9 @@
 namespace Auth;
 
 use Auth\Model\UserTable;
+use Auth\Model\SessionTable;
+use Zend\Authentication\AuthenticationService;
+use Zend\Authentication\Adapter\DbTable as DbTableAuthAdapter;
 
 class Module
 {
@@ -25,10 +28,21 @@ class Module
 	{
 		return array(
 			'factories' => array(
+				'AuthenticationService' => function ($sm){
+					$dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+					$dbTableAuthAdapter = new DbTableAuthAdapter($dbAdapter, 'users', 'login', 'pwd', 'MD5(?)');
+					$authService = new AuthenticationService(null, $dbTableAuthAdapter);
+					return $authService;
+				},
 				'UserTable' => function ($sm) {
 					$userTable =  new UserTable();
 					return $userTable;
+				},
+				'SessionTable' => function ($sm) {
+					$sessionTable =  new SessionTable();
+					return $sessionTable;
 				}
+				
 			),
 		);
 	}

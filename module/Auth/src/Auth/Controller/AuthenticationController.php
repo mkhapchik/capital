@@ -4,20 +4,13 @@ namespace Auth\Controller;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 use Auth\Form\LoginForm;
-use Zend\Authentication\AuthenticationService;
-use Zend\Authentication\Adapter\DbTable as DbTableAuthAdapter;
+
+use Zend\Authentication\Storage\Session as SessionAuth;
 
 class AuthenticationController extends AbstractActionController
 {
-	/**
-	 *  Объект AuthenticationService
-	 */
-	private $authservice;
-	
 	public function loginAction()
 	{
-		session_start();
-		var_dump(date("Y-m-d H:i:s",$_SESSION['__ZF']['_REQUEST_ACCESS_TIME']));
 		$err_message='';
 		$form = new LoginForm('loginForm');
 		$form->setAttribute('action', '/auth/login');
@@ -33,68 +26,101 @@ class AuthenticationController extends AbstractActionController
 				$login = $dataForm['login'];
 				$pwd = $dataForm['pwd'];
 				
-				$authServiceAdapter = $this->getAuthService()->getAdapter();
+				$authService = $this->getServiceLocator()->get('AuthenticationService');
+				
+				$authServiceAdapter = $authService->getAdapter();
 				$authServiceAdapter->setIdentity($login);
 				$authServiceAdapter->setCredential($pwd);
 
 				$result = $authServiceAdapter->authenticate();
 				
 				$userTable = $this->getServiceLocator()->get('UserTable');
+				$sessionTable = $this->getServiceLocator()->get('SessionTable');
+				
+				$config = $this->getServiceLocator()->get('config');
+				$authConfig = $config['auth'];
 				
 				if($result->isValid())
 				{
 					$user = $userTable->getUserByLogin($login);
+					
 					if($user->isBlocked())
 					{
 						$err_message = 'Пользователь заблокирован';
 					}
 					else
 					{	
-						$hash = md5(uniqid(rand(), 1));
-						$storage = $this->getAuthService()->getStorage();
-						$storage->write($hash);
+						$storage = $authService->getStorage();
+						if(!$storage->isEmpty()) 
+						{
+							$storage_data = $storage->read();
+							if(isset($storage_data['token'])) $sessionTable->close($storage_data['token']);
+													
+							$storage->clear();
+						}
+						
+						$sessionTable->closeAll($user->id);
+						$userTable->unlock($user->id);
+						
+						$token = md5(uniqid(rand(), 1));
+						$lastActivity = time();
+						
+						$storage->write(array('token'=>$token, 'last_activity'=>$lastActivity));
+						
+						
+						$sessionData = array();
+						
+						$sessionData['token'] = $token;
+						$sessionData['user_id'] = $user->id;
+						
+						$remote = new \Zend\Http\PhpEnvironment\RemoteAddress();
+						$sessionData['ip'] = $remote->getIpAddress();
+												
+						$sessionTable->save($sessionData);
+						
+						$this->redirect()->toRoute($authConfig['success_login_redirect_router']);
 					}
 				}
 				else
 				{
-					$config = $this->getServiceLocator()->get('config');
-						
-					$userTable->incrementCounterFailures($login, $config['max_counter_failures']);
+					$userTable->incrementCounterFailures($login, $authConfig['max_counter_failures']);
 					
 					$err_message = 'Неверный логин или пароль';
 				}
-			
-				
-				//return $this->redirect()->toRoute('categories/income');
             }
 			else
 			{
-				//return $this->redirect()->toRoute('/auth/login/err/1');
+				
 			}
 			
 			
         }
-		
-		
-		var_dump($this->getAuthService()->getStorage()->read());	
-		return array('form' => $form, 'err_message'=>$err_message);
-				
-		//return array('form' => $form, 'is_success'=>$is_success, 'message'=>$message);
+
+		return array('form' => $form, 'is_success'=>0, 'message'=>$err_message);
 	}
 	
-	protected function getAuthService()
+	public function logoutAction()
 	{
-		if(!$this->authservice)
+		$authService = $this->getServiceLocator()->get('AuthenticationService');
+		$storage = $authService->getStorage();
+		if(!$storage->isEmpty()) 
 		{
-			$dbAdapter = $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
-			$dbTableAuthAdapter = new DbTableAuthAdapter($dbAdapter, 'users', 'login', 'pwd', 'MD5(?)');
+			$storage_data = $storage->read();
 			
-			$authService = new AuthenticationService(null, $dbTableAuthAdapter);
-			
-			$this->authservice = $authService;
+			if(isset($storage_data['token'])) 
+			{
+				$sessionTable = $this->getServiceLocator()->get('SessionTable');
+				$sessionTableClassName = get_class($sessionTable);
+				$method_close = $sessionTableClassName::METHOD_CLOSE_MANUALLY;
+				
+				$sessionTable->close($storage_data['token'], $method_close);
+			}
+									
+			$storage->clear();
 		}
-		return $this->authservice;
+		
+		$config = $this->getServiceLocator()->get('config');
+		$authConfig = $config['auth'];
+		$this->redirect()->toRoute($authConfig['logout_redirect_router']);
 	}
-	
-	
 }

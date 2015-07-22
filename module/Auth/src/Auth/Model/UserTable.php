@@ -4,7 +4,6 @@ namespace Auth\Model;
 use Application\Model\AbstractTable;
 use Zend\Db\Sql\Expression;
 use Auth\Model\User;
-use ArrayObject;
 
 class UserTable extends AbstractTable
 {
@@ -22,16 +21,26 @@ class UserTable extends AbstractTable
 				'counter_failures' => new Expression('counter_failures + 1'),
 				'blocked' => new Expression("counter_failures>$max_counter_failures")
 			), 
-			array('login' => $login, 'blocked'=>0));
+			array('login' => $login, 'blocked'=>0)
+		);
+	}
+	
+	public function unlock($user_id)
+	{
+		$this->update(array('blocked' => 0, 'counter_failures' => 0), array('id' => $user_id));
+	}
+	
+	public function lock($user_id)
+	{
+		$this->update(array('blocked' => 1, 'counter_failures' => 0), array('id' => $user_id));
 	}
 	
 	public function getUserByLogin($login)
 	{
 		$rowset = $this->select(array('login' => $login));
-        //$rowset->setObjectPrototype(new User());
-		$rowset->setObjectPrototype($this->objectPrototype);
+        $rowset->setObjectPrototype($this->objectPrototype);
 		$row = $rowset->current();
-        if (!$row) throw new \Exception("Could not find row $id");
+        if (!$row) throw new \Exception("Could not find row");
         
         return $row;
 	}

@@ -1,7 +1,10 @@
 <?php
 return array(
-	'max_counter_failures'=>3,
-	
+	'auth'=>array(
+		'max_counter_failures'=>3,
+		'success_login_redirect_router'=>'home',
+		'logout_redirect_router'=>'home'
+	),	
 	'controllers' => array(
         'invokables' => array(
             'Auth\Controller\Authentication' => 'Auth\Controller\AuthenticationController',	
@@ -25,6 +28,17 @@ return array(
 								'__NAMESPACE__' => 'Auth\Controller',
 								'controller'    => 'Authentication',
 								'action'        => 'login',
+                            ),
+                        ),						
+                    ),
+					'logout'=> array(
+                        'type'    => 'Literal',
+                        'options' => array(
+                            'route'    => '/logout',
+                            'defaults' => array(
+								'__NAMESPACE__' => 'Auth\Controller',
+								'controller'    => 'Authentication',
+								'action'        => 'logout',
                             ),
                         ),						
                     ),

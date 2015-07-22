@@ -20,7 +20,7 @@ abstract class AbstractTable extends AbstractTableGateway implements AdapterAwar
 	{
 		$this->objectPrototype = new ArrayObject();
 	}
-	
+		
     public function setDbAdapter(Adapter $adapter)
     {
         $this->adapter = $adapter;
