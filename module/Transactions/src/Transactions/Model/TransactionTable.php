@@ -20,7 +20,7 @@ class TransactionTable extends AbstractTable
 		$this->type = $type;
 	}
     	
-    public function save(Transaction $transaction)
+    public function save($transaction, $id=0)
     {
 		$query = "CALL transactions('{$transaction->date}', '{$transaction->amount}', '{$transaction->categories_id}', '{$transaction->account_id}', '{$transaction->comment}')";
 		$r = $this->adapter->query($query, Adapter::QUERY_MODE_EXECUTE);
