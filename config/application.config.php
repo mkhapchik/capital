@@ -8,7 +8,7 @@
 return array(
     'modules' => array(
         'Application',
-		'Auth',
+		//'Auth',
         'ZFTool',
         'Account',
         'Categories',
