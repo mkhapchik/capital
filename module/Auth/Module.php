@@ -5,6 +5,8 @@ use Auth\Model\UserTable;
 use Auth\Model\SessionTable;
 use Zend\Authentication\AuthenticationService;
 use Zend\Authentication\Adapter\DbTable as DbTableAuthAdapter;
+use Auth\Controller\AuthorizationController;
+use Auth\Controller\AuthenticationController;
 
 class Module
 {
@@ -41,6 +43,12 @@ class Module
 				'SessionTable' => function ($sm) {
 					$sessionTable =  new SessionTable();
 					return $sessionTable;
+				},
+				'AuthorizationController'=>function($sm){
+					return new AuthorizationController();
+				},
+				'AuthenticationController'=>function($sm){
+					return new AuthenticationController();
 				}
 				
 			),

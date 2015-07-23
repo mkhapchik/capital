@@ -11,9 +11,11 @@ class AuthenticationController extends AbstractActionController
 {
 	public function loginAction()
 	{
-		$err_message='';
+		$message = $this->params()->fromRoute('message', false);
+		$is_success = $this->params()->fromRoute('is_success', 1);
+		
 		$form = new LoginForm('loginForm');
-		$form->setAttribute('action', '/auth/login');
+		//$form->setAttribute('action', '/auth/login');
    
         $request = $this->getRequest();
         if ($request->isPost()) 
@@ -46,7 +48,8 @@ class AuthenticationController extends AbstractActionController
 					
 					if($user->isBlocked())
 					{
-						$err_message = 'Пользователь заблокирован';
+						$is_success=0;
+						$message = 'Пользователь заблокирован';
 					}
 					else
 					{	
@@ -85,21 +88,24 @@ class AuthenticationController extends AbstractActionController
 				{
 					$userTable->incrementCounterFailures($login, $authConfig['max_counter_failures']);
 					
-					$err_message = 'Неверный логин или пароль';
+					$is_success=0;
+					$message = 'Неверный логин или пароль';
+					
+					
 				}
             }
 			else
 			{
-				
+				$is_success=0;
+				$message = 'Неверный логин или пароль';
 			}
-			
-			
         }
-
-		return array('form' => $form, 'is_success'=>0, 'message'=>$err_message);
+		
+		$view = new ViewModel(array('form' => $form, 'is_success'=>$is_success, 'message'=>$message));
+		return $view;
 	}
 	
-	public function logoutAction()
+	public function logoutAction($is_redirect = true)
 	{
 		$authService = $this->getServiceLocator()->get('AuthenticationService');
 		$storage = $authService->getStorage();
@@ -119,8 +125,11 @@ class AuthenticationController extends AbstractActionController
 			$storage->clear();
 		}
 		
-		$config = $this->getServiceLocator()->get('config');
-		$authConfig = $config['auth'];
-		$this->redirect()->toRoute($authConfig['logout_redirect_router']);
+		if($is_redirect)
+		{
+			$config = $this->getServiceLocator()->get('config');
+			$authConfig = $config['auth'];
+			$this->redirect()->toRoute($authConfig['logout_redirect_router']);
+		}
 	}
 }

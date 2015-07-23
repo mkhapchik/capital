@@ -3,7 +3,8 @@ return array(
 	'auth'=>array(
 		'max_counter_failures'=>3,
 		'success_login_redirect_router'=>'home',
-		'logout_redirect_router'=>'home'
+		'logout_redirect_router'=>'home',
+		'inactivity_time_min' => 0.2
 	),	
 	'controllers' => array(
         'invokables' => array(

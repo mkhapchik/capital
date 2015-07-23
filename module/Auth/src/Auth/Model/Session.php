@@ -4,7 +4,7 @@ namespace Auth\Model;
 class Session
 {
 	protected $id;
-	protected $user_id;
+	public $user_id;
 	protected $token;
 	protected $ip;
 	protected $starttime;

@@ -33,5 +33,13 @@ class SessionTable extends AbstractTable
 		);
 	}
 	
+	public function getSession($token, $ip)
+	{
+		$rowset = $this->select(array('token' => $token, 'closed'=>0, 'ip'=>$ip));
+        $rowset->setObjectPrototype($this->objectPrototype);
+		$row = $rowset->current();
+		return $row;
+	}
+	
 	
 }
