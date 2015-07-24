@@ -21,6 +21,7 @@
 					?>
 				</nav>
 				Логин: <?=isset($login)? $login : ''?>
+			
 			</section>
 			<section class="main">
 				<section class="view">
@@ -34,5 +35,7 @@
 				&copy; 2005 - <? echo date('Y'); ?> by Zend Technologies Ltd. <?php echo $this->translate('All rights reserved.') ?></p>
 			</footer>
 		</section>
+		
+		<?php echo $this->AuthHelper()->timeoutScript(); ?>
 	</body>
 </html>

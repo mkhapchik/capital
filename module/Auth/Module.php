@@ -56,7 +56,7 @@ class Module
 		$authorizationController = $serviceManager->get('AuthorizationController');
 		$codeAccess = $authorizationController->checkAccess();
 		
-		if(!in_array($routName, array('auth/login', 'auth/logout')))
+		if(!in_array($routName, array('auth/login', 'auth/logout', 'auth/timeout')))
 		{
 			$authorizationController = $serviceManager->get('AuthorizationController');
 		

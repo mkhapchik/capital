@@ -149,4 +149,6 @@ class AuthenticationController extends AbstractActionController
 			$this->redirect()->toRoute($authConfig['logout_redirect_router']);
 		}
 	}
+	
+	
 }

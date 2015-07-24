@@ -22,6 +22,7 @@ class IndexController extends AbstractActionController
             'message' => 'Hello <br> world',
         ));
  
+		//$view->setTerminal(true);
         return $view;
     }
 }
