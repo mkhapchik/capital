@@ -11,11 +11,11 @@ namespace Application;
 
 use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
-use Zend\View\Model\ViewModel;
+
 
 class Module
 {
-    private $acl;
+    
 	
 	public function getAutoloaderConfig()
     {
@@ -61,13 +61,6 @@ class Module
         $moduleRouteListener->attach($eventManager);
 
 		//$eventManager->attach(MvcEvent::EVENT_ROUTE, array($this, 'addRoutes'), 2);
-		
-		
-		$eventManager->attach(MvcEvent::EVENT_ROUTE, array($this, 'checkAccess'));
-		
-		
-		
-		
     }
 	
 	public function addRoutes(MvcEvent $e)
@@ -85,53 +78,6 @@ class Module
 		$router->addRoute('foo', $route);
 	}
 	
-	public function checkAccess(MvcEvent $e)
-	{
-		$serviceManager = $e->getApplication()->getServiceManager();
-		$routeMatch = $e->getRouteMatch();
-		$routName = $routeMatch->getMatchedRouteName();
-		
-		$authorizationController = $serviceManager->get('AuthorizationController');
-		$codeAccess = $authorizationController->checkAccess();
-		
-		if(!in_array($routName, array('auth/login', 'auth/logout')))
-		{
-			$authorizationController = $serviceManager->get('AuthorizationController');
-			$classNameAuthorization = get_class($authorizationController);
-			
-			
-			if($codeAccess != $classNameAuthorization::CODE_ACCESS_IS_ALLOWED)
-			{
-				switch($codeAccess)
-				{
-					case $classNameAuthorization::CODE_ACCESS_IS_DENIED : 
-						$message = 'Доступ запрещен!'; 
-						break;
-					case $classNameAuthorization::CODE_ACCESS_IS_DENIED_BY_TIMEOUT : 
-						$message = 'Таймаут неактивности!'; 
-						break;
-					default: 
-						$message = 'Доступ запрещен!';
-				}
-				
-				$routeMatch->setParam('controller', 'Auth\Controller\Authentication');
-				$routeMatch->setParam('action', 'login');
-				$routeMatch->setParam('message', $message);
-				$routeMatch->setParam('is_success', 0);
-				
-				
-				
-			}
-			
-		}
-		
-		$user = $authorizationController->getUser();
-		if($user) echo $user->login;
-	}
 	
-	public function initAcl(MvcEvent $e)
-	{
-		echo __CLASS__;
-	}
 	
 }

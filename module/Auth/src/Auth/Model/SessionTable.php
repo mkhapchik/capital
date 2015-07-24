@@ -9,6 +9,7 @@ class SessionTable extends AbstractTable
 {
 	const METHOD_CLOSE_AUTOMATIC = 'automatic';
 	const METHOD_CLOSE_MANUALLY = 'manually';
+	const METHOD_CLOSE_TIMEOUT = 'timeout';
 	
 	protected $table = 'session';
  

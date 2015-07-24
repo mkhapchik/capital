@@ -16,7 +16,6 @@ class IndexController extends AbstractActionController
 {
     public function indexAction()
     {
-		echo 'запрещенный контроллер';
 		$this->layout()->setVariable('title', 'Мой капитал');
 		
 		$view = new ViewModel(array(

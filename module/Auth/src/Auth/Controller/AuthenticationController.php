@@ -3,17 +3,36 @@ namespace Auth\Controller;
 
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
-use Auth\Form\LoginForm;
-
 use Zend\Authentication\Storage\Session as SessionAuth;
+use Auth\Form\LoginForm;
+use Auth\Controller\AuthorizationController;
+use Auth\Model\SessionTable;
 
 class AuthenticationController extends AbstractActionController
 {
 	public function loginAction()
 	{
-		$message = $this->params()->fromRoute('message', false);
+		$codeAccess = $this->params()->fromRoute('codeAccess', AuthorizationController::CODE_ACCESS_NULL);
 		$is_success = $this->params()->fromRoute('is_success', 1);
 		
+		switch($codeAccess)
+		{
+			case AuthorizationController::CODE_ACCESS_NULL:
+				$message = '';
+				break;
+			case AuthorizationController::CODE_ACCESS_IS_ALLOWED:
+				$message = '';
+				break;
+			case AuthorizationController::CODE_ACCESS_IS_DENIED : 
+				$message = 'Доступ запрещен!'; 
+				break;
+			case AuthorizationController::CODE_ACCESS_IS_DENIED_BY_TIMEOUT : 
+				$message = 'Таймаут логина!'; 
+				break;
+			default: 
+				$message = 'Доступ запрещен!';
+		}
+
 		$form = new LoginForm('loginForm');
 		//$form->setAttribute('action', '/auth/login');
    
@@ -75,6 +94,7 @@ class AuthenticationController extends AbstractActionController
 						
 						$sessionData['token'] = $token;
 						$sessionData['user_id'] = $user->id;
+						$sessionData['last_activity'] = date('Y-m-d H:i:s',$lastActivity);
 						
 						$remote = new \Zend\Http\PhpEnvironment\RemoteAddress();
 						$sessionData['ip'] = $remote->getIpAddress();
@@ -90,8 +110,6 @@ class AuthenticationController extends AbstractActionController
 					
 					$is_success=0;
 					$message = 'Неверный логин или пароль';
-					
-					
 				}
             }
 			else
@@ -105,7 +123,7 @@ class AuthenticationController extends AbstractActionController
 		return $view;
 	}
 	
-	public function logoutAction($is_redirect = true)
+	public function logoutAction($is_redirect = true, $method_close=SessionTable::METHOD_CLOSE_MANUALLY)
 	{
 		$authService = $this->getServiceLocator()->get('AuthenticationService');
 		$storage = $authService->getStorage();
@@ -117,7 +135,6 @@ class AuthenticationController extends AbstractActionController
 			{
 				$sessionTable = $this->getServiceLocator()->get('SessionTable');
 				$sessionTableClassName = get_class($sessionTable);
-				$method_close = $sessionTableClassName::METHOD_CLOSE_MANUALLY;
 				
 				$sessionTable->close($storage_data['token'], $method_close);
 			}
