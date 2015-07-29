@@ -14,6 +14,7 @@
 	
 		<section id="wrapper">
 			<section class="top_panel">	
+				<?php echo $this->AuthHelper()->user(); ?>
 				<nav>
 					<?php 
 						echo $this->navigation('Navigation')->menu()->setPartial('application/navigation/menu')->render();
@@ -33,5 +34,7 @@
 				&copy; 2005 - <? echo date('Y'); ?> by Zend Technologies Ltd. <?php echo $this->translate('All rights reserved.') ?></p>
 			</footer>
 		</section>
+		
+		<?php echo $this->AuthHelper()->timeoutScript(); ?>
 	</body>
 </html>

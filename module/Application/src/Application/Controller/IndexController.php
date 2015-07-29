@@ -16,13 +16,13 @@ class IndexController extends AbstractActionController
 {
     public function indexAction()
     {
-
 		$this->layout()->setVariable('title', 'Мой капитал');
 		
 		$view = new ViewModel(array(
             'message' => 'Hello <br> world',
         ));
  
+		//$view->setTerminal(true);
         return $view;
     }
 }

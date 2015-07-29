@@ -10,20 +10,6 @@ class IncomeController extends AbstractActionController
 {
 	public function indexAction()
 	{
-		/*
-			
-		$this->layout()->setVariables(array(
-			'title' => 'TEST',
-		));
-		
-		$view = new ViewModel(array(
-            'test' => "qwe",
-        ));
-		
-		//$view->setTerminal(true);
- 
-        return $view;
-		*/
 		$categoryTable = $this->getCategoryTable();
 		$categoryTable->setType(1);
 		$categories = $categoryTable->fetchAll();

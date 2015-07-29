@@ -18,4 +18,4 @@ require 'init_autoloader.php';
 Zend\Mvc\Application::init(require 'config/application.config.php')->run();
 
 
-printf("Время формирования страницы: %.2f c", microtime(true)-$time);
+//printf("Время формирования страницы: %.2f c", microtime(true)-$time);

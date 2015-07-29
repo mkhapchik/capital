@@ -1,0 +1,25 @@
+<script>
+	var timerId;
+	
+	function checkTimeout()
+	{
+		$.ajax({
+			type:'post',
+			url:'<?=$url?>',
+			success: function(result)
+			{
+				if(result!='0')
+				{
+					clearInterval(timerId);
+					var div = $('<div/>');
+					div.html(result);
+					div.dialog({width:'400px', minHeight:'400px'});
+				}
+			}
+		});
+	}
+	
+	$(document).ready(function(){
+		timerId = setInterval(function(){checkTimeout()}, <?=$frequency?>*1000);
+	});
+</script>
