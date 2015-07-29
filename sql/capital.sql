@@ -1,7 +1,7 @@
 ﻿--
--- Скрипт сгенерирован Devart dbForge Studio for MySQL, Версия 6.2.280.0
+-- Скрипт сгенерирован Devart dbForge Studio for MySQL, Версия 6.3.358.0
 -- Домашняя страница продукта: http://www.devart.com/ru/dbforge/mysql/studio
--- Дата скрипта: 09.07.2015 19:14:26
+-- Дата скрипта: 29.07.2015 9:21:00
 -- Версия сервера: 5.5.23
 -- Версия клиента: 4.1
 --
@@ -22,11 +22,6 @@
 --
 SET NAMES 'utf8';
 
--- 
--- Установка базы данных по умолчанию
---
-USE capital;
-
 --
 -- Описание для таблицы account
 --
@@ -41,7 +36,7 @@ CREATE TABLE account (
   PRIMARY KEY (id)
 )
 ENGINE = INNODB
-AUTO_INCREMENT = 8
+AUTO_INCREMENT = 5
 AVG_ROW_LENGTH = 16384
 CHARACTER SET utf8
 COLLATE utf8_general_ci
@@ -62,8 +57,8 @@ CREATE TABLE categories (
   PRIMARY KEY (id)
 )
 ENGINE = INNODB
-AUTO_INCREMENT = 35
-AVG_ROW_LENGTH = 1365
+AUTO_INCREMENT = 16
+AVG_ROW_LENGTH = 8192
 CHARACTER SET cp1251
 COLLATE cp1251_general_ci
 COMMENT = 'Категории расхода и дохода';
@@ -83,10 +78,35 @@ CREATE TABLE menu (
 )
 ENGINE = INNODB
 AUTO_INCREMENT = 7
-AVG_ROW_LENGTH = 3276
+AVG_ROW_LENGTH = 2730
 CHARACTER SET cp1251
 COLLATE cp1251_general_ci
 COMMENT = 'Меню';
+
+--
+-- Описание для таблицы session
+--
+DROP TABLE IF EXISTS session;
+CREATE TABLE session (
+  id BIGINT(20) NOT NULL AUTO_INCREMENT,
+  user_id BIGINT(20) NOT NULL COMMENT 'id пользователя',
+  token VARCHAR(255) NOT NULL COMMENT 'идентификатор сессии',
+  ip VARCHAR(255) NOT NULL COMMENT 'ip пользователя',
+  starttime DATETIME NOT NULL COMMENT 'время открытия сессии',
+  endtime DATETIME DEFAULT NULL COMMENT 'время завершения сессии',
+  closed INT(11) NOT NULL DEFAULT 0 COMMENT 'флаг: 1 - сессия закрыта, 0 - открыта',
+  method_close ENUM('automatic','timeout','manually') DEFAULT NULL COMMENT 'флаг: 1 - автоматическое завершение сессии 0 - логаут пользователя',
+  last_activity DATETIME DEFAULT NULL COMMENT 'время последней активности',
+  PRIMARY KEY (id),
+  INDEX IDX_session_user_id (user_id),
+  UNIQUE INDEX UK_session_hash (token)
+)
+ENGINE = INNODB
+AUTO_INCREMENT = 101
+AVG_ROW_LENGTH = 512
+CHARACTER SET cp1251
+COLLATE cp1251_general_ci
+COMMENT = 'Сессия пользователей';
 
 --
 -- Описание для таблицы tasks
@@ -108,6 +128,27 @@ AUTO_INCREMENT = 1
 CHARACTER SET cp1251
 COLLATE cp1251_general_ci
 COMMENT = 'Задачи для автоматических транзакций';
+
+--
+-- Описание для таблицы users
+--
+DROP TABLE IF EXISTS users;
+CREATE TABLE users (
+  id BIGINT(20) NOT NULL AUTO_INCREMENT,
+  login VARCHAR(255) NOT NULL COMMENT 'Логин',
+  pwd VARCHAR(255) NOT NULL COMMENT 'Хеш пароля',
+  counter_failures INT(11) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Счетчик неверных авторизаций',
+  blocked INT(11) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Флаг блокировки: 1 - заблокирован, 0 - активен',
+  name VARCHAR(50) NOT NULL COMMENT 'Имя пользователя',
+  PRIMARY KEY (id),
+  UNIQUE INDEX UK_users_login (login)
+)
+ENGINE = INNODB
+AUTO_INCREMENT = 3
+AVG_ROW_LENGTH = 8192
+CHARACTER SET cp1251
+COLLATE cp1251_general_ci
+COMMENT = 'Пользователи';
 
 --
 -- Описание для таблицы arrears
@@ -176,8 +217,8 @@ CREATE TABLE transactions (
     REFERENCES categories(id) ON DELETE NO ACTION ON UPDATE NO ACTION
 )
 ENGINE = INNODB
-AUTO_INCREMENT = 42
-AVG_ROW_LENGTH = 309
+AUTO_INCREMENT = 13
+AVG_ROW_LENGTH = 3276
 CHARACTER SET cp1251
 COLLATE cp1251_general_ci
 COMMENT = 'Операции по счетам';
@@ -204,12 +245,25 @@ END
 $$
 
 --
+-- Описание для процедуры delete_user
+--
+DROP PROCEDURE IF EXISTS delete_user$$
+CREATE PROCEDURE delete_user(IN p_user_id BIGINT)
+  SQL SECURITY INVOKER
+BEGIN
+  DELETE FROM session WHERE user_id=p_user_id;
+  DELETE FROM users WHERE id=p_user_id;
+
+END
+$$
+
+--
 -- Описание для процедуры getOverflow
 --
 DROP PROCEDURE IF EXISTS getOverflow$$
 CREATE PROCEDURE getOverflow(IN p_date_start date, IN p_date_end date, IN p_category_type INT)
   SQL SECURITY INVOKER
-  COMMENT 'Переполнение за указанный период'
+  COMMENT 'Переполнение за указанный месяц'
 BEGIN
   DECLARE v_date_from DATE;
   DECLARE v_date_to DATE;
@@ -287,7 +341,7 @@ BEGIN
   
   SET v_lastId = LAST_INSERT_ID();
   
-  CALL update_accounts(p_account_id, p_amount*v_op_sign);
+  CALL update_accounts(p_account_id);
   CALL update_statistic();
 
   /* Сделать процедуру подсчета превышений по каждому лимиту
@@ -305,7 +359,7 @@ $$
 --
 DROP PROCEDURE IF EXISTS update_accounts$$
 CREATE DEFINER = 'root'@'localhost'
-PROCEDURE update_accounts(IN p_account_id bigint(20), IN p_amount DECIMAL(8,2))
+PROCEDURE update_accounts(IN p_account_id bigint(20))
   COMMENT 'Обновление счета'
 BEGIN
   DECLARE v_count int;
@@ -313,21 +367,12 @@ BEGIN
   DECLARE v_percent int;
   DECLARE v_amount decimal(8,2);
    
-  /*
   SELECT SUM(t.amount*t.op_sign),COUNT(id) INTO v_amount,v_count FROM transactions t WHERE t.account_id=p_account_id;      
   SELECT COUNT(id) INTO v_total FROM transactions;
    
   SET v_percent = (v_count/v_total) * 100;
     
   UPDATE account a SET a.amount=v_amount, a.statistic=v_percent WHERE a.id=p_account_id;
-  */
-
-  SELECT COUNT(id) INTO v_count FROM transactions t WHERE t.account_id=p_account_id;      
-  SELECT COUNT(id) INTO v_total FROM transactions;
-   
-  SET v_percent = (v_count/v_total) * 100;
-    
-  UPDATE account a SET a.amount=a.amount+p_amount, a.statistic=v_percent WHERE a.id=p_account_id;
 END
 $$
 
@@ -367,6 +412,26 @@ BEGIN
       UPDATE categories SET statistic=v_percent WHERE id=v_category_id;
     END IF; 
   UNTIL done END REPEAT;
+END
+$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+--
+-- Описание для триггера session_OnInsert
+--
+DROP TRIGGER IF EXISTS session_OnInsert$$
+CREATE 
+	DEFINER = 'root'@'localhost'
+TRIGGER session_OnInsert
+	BEFORE INSERT
+	ON session
+	FOR EACH ROW
+BEGIN
+  -- SET NEW.starttime = IFNULL(NEW.starttime, NOW());
+  SET NEW.starttime = NOW();
 END
 $$
 
