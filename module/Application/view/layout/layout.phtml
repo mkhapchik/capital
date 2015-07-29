@@ -14,14 +14,13 @@
 	
 		<section id="wrapper">
 			<section class="top_panel">	
+				<?php echo $this->AuthHelper()->user(); ?>
 				<nav>
 					<?php 
 						echo $this->navigation('Navigation')->menu()->setPartial('application/navigation/menu')->render();
 						//echo $this->navigation('Navigation')->menu()->render();
 					?>
 				</nav>
-				Логин: <?=isset($login)? $login : ''?>
-			
 			</section>
 			<section class="main">
 				<section class="view">

@@ -37,7 +37,8 @@ class AuthenticationController extends AbstractActionController
 		//$form->setAttribute('action', '/auth/login');
    
         $request = $this->getRequest();
-        if ($request->isPost()) 
+       
+		if ($request->isPost() && $request->getPost('submit', false)!==false) 
 		{
             $form->setData($request->getPost());
  

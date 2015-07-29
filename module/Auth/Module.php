@@ -54,10 +54,10 @@ class Module
 		$routName = $routeMatch->getMatchedRouteName();
 		
 		$authorizationController = $serviceManager->get('AuthorizationController');
-		$codeAccess = $authorizationController->checkAccess();
-		
+				
 		if(!in_array($routName, array('auth/login', 'auth/logout', 'auth/timeout')))
 		{
+			$codeAccess = $authorizationController->checkAccess();
 			$authorizationController = $serviceManager->get('AuthorizationController');
 		
 			if($codeAccess != AuthorizationController::CODE_ACCESS_IS_ALLOWED)
@@ -70,15 +70,6 @@ class Module
 				$routeMatch->setParam('is_success', 0);
 			}
 		}
-		
-		$user = $authorizationController->getUser();
-		
-		if($user)
-		{
-			$viewModel = $e->getViewModel();
-			$viewModel->setVariable('login', $user->login);
-		}
-		
 	}
 	
 	public function initAcl(MvcEvent $e)

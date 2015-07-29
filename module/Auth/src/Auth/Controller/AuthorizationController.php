@@ -71,8 +71,6 @@ class AuthorizationController extends AbstractActionController
 							$authenticationController = $serviceLocator->get('AuthenticationController');
 							$authenticationController->logoutAction(false, SessionTable::METHOD_CLOSE_TIMEOUT);
 						}
-						
-						
 					}
 				}
 			}
@@ -86,31 +84,39 @@ class AuthorizationController extends AbstractActionController
 		$authService = $this->getServiceLocator()->get('AuthenticationService');
 		$storage = $authService->getStorage();
 		
+		if(!$storage->isEmpty())
+		{
+			$storage_data = $storage->read();
+			
+			$lastActivity = isset($storage_data['last_activity']) ? $storage_data['last_activity'] : 0;
+			
+			$config = $this->getServiceLocator()->get('config');
+			$authConfig = $config['auth'];
+			$inactivityTime = $authConfig['inactivity_time_min']*60;
+			
+			if((time()-$lastActivity)<=$inactivityTime)
+			{
+				$result = false;
+			}
+			else
+			{
+				$view = $this->forward()->dispatch('Auth\Controller\Authentication', array(
+					'action' => 'login',
+					'is_success'=>0,
+					'codeAccess'=>self::CODE_ACCESS_IS_DENIED_BY_TIMEOUT
+				));
+				$view->setTerminal(true);
+				return $view;
+			}
+		}
+		else $result = false;
 		
-		$storage_data = $storage->read();
-		$lastActivity = isset($storage_data['last_activity']) ? $storage_data['last_activity'] : 0;
-		
-		
-		$config = $this->getServiceLocator()->get('config');
-		$authConfig = $config['auth'];
-		$inactivityTime = $authConfig['inactivity_time_min']*60;
-		
-		
-		if((time()-$lastActivity)<=$inactivityTime)
+		if(!$result)
 		{
 			echo 0;
 			exit();
 		}
-		else
-		{
-			$view = $this->forward()->dispatch('Auth\Controller\Authentication', array(
-				'action' => 'login',
-				'is_success'=>0,
-				'codeAccess'=>self::CODE_ACCESS_IS_DENIED_BY_TIMEOUT
-			));
-			$view->setTerminal(true);
-			return $view;
-		}
+		else return $result;
 	}
 	
 	public function getUser()

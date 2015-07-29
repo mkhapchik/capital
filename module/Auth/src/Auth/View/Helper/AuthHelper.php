@@ -33,21 +33,44 @@ class AuthHelper extends AbstractHelper implements ServiceLocatorAwareInterface
 	{
 		$config = $this->sm->get('config');
 		
-		var_dump(get_class($this->pm->get('url')));
-		
 		$view = new ViewModel(array(
 			'frequency' => $config['auth']['frequency_of_check_timeout_sec'],
-			'url' => '/auth/timeout'
+			'url' => $this->pm->get('url')->__invoke('auth/timeout')
 		));
  
-		//$view->setTerminal(true);
 		$view->setTemplate('auth/AuthHelper/timeoutScript');
 
         $partialHelper = $this->view->plugin('partial');
 		
-		
         return $partialHelper($view);
 		
+	}
+	
+	public function user()
+	{
+		$authorizationController = $this->sm->get('AuthorizationController');
+		$user = $authorizationController->getUser();
+		
+		$view = new ViewModel();
+			
+		if($user)
+		{
+			$logout_url = $this->pm->get('url')->__invoke('auth/logout');
+			$view->setVariable('logout_url', $logout_url);
+			$view->setVariable('user', $user);
+						
+			$view->setTemplate('auth/AuthHelper/user');
+		}
+		else
+		{
+			$login_url = $this->pm->get('url')->__invoke('auth/login');
+			$view->setVariable('login_url', $login_url);
+			
+			$view->setTemplate('auth/AuthHelper/guest');
+		}
+
+		$partialHelper = $this->view->plugin('partial');
+		return $partialHelper($view);
 	}
 }
 ?>
