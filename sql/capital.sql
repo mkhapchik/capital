@@ -1,7 +1,7 @@
 ﻿--
--- Скрипт сгенерирован Devart dbForge Studio for MySQL, Версия 6.3.358.0
+-- Скрипт сгенерирован Devart dbForge Studio for MySQL, Версия 6.2.280.0
 -- Домашняя страница продукта: http://www.devart.com/ru/dbforge/mysql/studio
--- Дата скрипта: 29.07.2015 17:59:01
+-- Дата скрипта: 30.07.2015 0:11:37
 -- Версия сервера: 5.5.23
 -- Версия клиента: 4.1
 --
@@ -36,7 +36,7 @@ CREATE TABLE account (
   PRIMARY KEY (id)
 )
 ENGINE = INNODB
-AUTO_INCREMENT = 5
+AUTO_INCREMENT = 10
 AVG_ROW_LENGTH = 16384
 CHARACTER SET utf8
 COLLATE utf8_general_ci
@@ -57,8 +57,8 @@ CREATE TABLE categories (
   PRIMARY KEY (id)
 )
 ENGINE = INNODB
-AUTO_INCREMENT = 16
-AVG_ROW_LENGTH = 8192
+AUTO_INCREMENT = 37
+AVG_ROW_LENGTH = 1365
 CHARACTER SET cp1251
 COLLATE cp1251_general_ci
 COMMENT = 'Категории расхода и дохода';
@@ -78,7 +78,7 @@ CREATE TABLE menu (
 )
 ENGINE = INNODB
 AUTO_INCREMENT = 7
-AVG_ROW_LENGTH = 2730
+AVG_ROW_LENGTH = 3276
 CHARACTER SET cp1251
 COLLATE cp1251_general_ci
 COMMENT = 'Меню';
@@ -102,7 +102,7 @@ CREATE TABLE session (
   UNIQUE INDEX UK_session_hash (token)
 )
 ENGINE = INNODB
-AUTO_INCREMENT = 105
+AUTO_INCREMENT = 107
 AVG_ROW_LENGTH = 455
 CHARACTER SET cp1251
 COLLATE cp1251_general_ci
@@ -144,7 +144,7 @@ CREATE TABLE users (
   UNIQUE INDEX UK_users_login (login)
 )
 ENGINE = INNODB
-AUTO_INCREMENT = 3
+AUTO_INCREMENT = 5
 AVG_ROW_LENGTH = 8192
 CHARACTER SET cp1251
 COLLATE cp1251_general_ci
@@ -217,8 +217,8 @@ CREATE TABLE transactions (
     REFERENCES categories(id) ON DELETE NO ACTION ON UPDATE NO ACTION
 )
 ENGINE = INNODB
-AUTO_INCREMENT = 14
-AVG_ROW_LENGTH = 2730
+AUTO_INCREMENT = 149
+AVG_ROW_LENGTH = 309
 CHARACTER SET cp1251
 COLLATE cp1251_general_ci
 COMMENT = 'Операции по счетам';
@@ -229,8 +229,8 @@ DELIMITER $$
 -- Описание для процедуры auto_transaction
 --
 DROP PROCEDURE IF EXISTS auto_transaction$$
-CREATE PROCEDURE auto_transaction(IN p_id bigint(20))
-  SQL SECURITY INVOKER
+CREATE DEFINER = 'root'@'localhost'
+PROCEDURE auto_transaction(IN p_id bigint(20))
   COMMENT 'Автоматическая транзакция - исполнение задания'
 BEGIN
   DECLARE v_date date;
@@ -349,40 +349,38 @@ $$
 -- Описание для процедуры transactions
 --
 DROP PROCEDURE IF EXISTS transactions$$
-CREATE PROCEDURE transactions(IN p_date DATE, IN p_amount DECIMAL(8,2), IN p_categories_id bigint(20), IN p_account_id bigint(20), IN p_comment varchar(500))
+CREATE PROCEDURE transactions(IN p_date date, IN p_amount decimal(8, 2), IN p_categories_id bigint(20), IN p_account_id bigint(20), IN p_comment varchar(500))
   SQL SECURITY INVOKER
   COMMENT 'Добавление дохода или расхода'
 BEGIN
   DECLARE v_op_sign int;
   DECLARE v_type int;
-  DECLARE v_amount_res decimal(8,2);
-  DECLARE v_amount_limit decimal(8,2);
+  DECLARE v_amount_res decimal(8, 2);
+  DECLARE v_amount_limit decimal(8, 2);
   DECLARE v_lastId bigint(20);
-                    
-                   
-  
-  SELECT c.type INTO v_type FROM categories c WHERE c.id=p_categories_id;
-  
-  IF(v_type=1) THEN
-    SET v_op_sign=1;
+
+  SELECT
+    c.type INTO v_type
+  FROM categories c
+  WHERE c.id = p_categories_id;
+
+  IF (v_type = 1) THEN
+    SET v_op_sign = 1;
   ELSE
-    SET v_op_sign=-1;
+    SET v_op_sign = -1;
   END IF;
 
-  INSERT INTO transactions (date, amount, categories_id, account_id, comment, op_sign) VALUES(p_date, p_amount, p_categories_id, p_account_id, p_comment, v_op_sign);
-  
+  INSERT INTO transactions (date, amount, categories_id, account_id, comment, op_sign)
+    VALUES (p_date, p_amount, p_categories_id, p_account_id, p_comment, v_op_sign);
+
   SET v_lastId = LAST_INSERT_ID();
-  
-  CALL update_accounts(p_account_id);
+
+  CALL update_accounts(p_account_id, p_amount * v_op_sign);
   CALL update_statistic();
 
-  /* Сделать процедуру подсчета превышений по каждому лимиту
-  SELECT ABS(SUM(amount*op_sign)) INTO v_amount_res FROM transactions WHERE categories_id=p_categories_id;
-  SELECT amount_limit INTO v_amount_limit FROM categories WHERE id=p_categories_id;
   
-  SELECT v_amount_res, v_amount_limit, IF(v_amount_res>v_amount_limit, 1, 0) AS overflow;
-  */
-  SELECT v_lastId as id;
+  SELECT
+    v_lastId AS id;
 END
 $$
 
@@ -391,20 +389,28 @@ $$
 --
 DROP PROCEDURE IF EXISTS update_accounts$$
 CREATE DEFINER = 'root'@'localhost'
-PROCEDURE update_accounts(IN p_account_id bigint(20))
+PROCEDURE update_accounts(IN p_account_id bigint(20), IN p_amount decimal(8, 2))
   COMMENT 'Обновление счета'
 BEGIN
   DECLARE v_count int;
   DECLARE v_total int;
   DECLARE v_percent int;
-  DECLARE v_amount decimal(8,2);
-   
-  SELECT SUM(t.amount*t.op_sign),COUNT(id) INTO v_amount,v_count FROM transactions t WHERE t.account_id=p_account_id;      
-  SELECT COUNT(id) INTO v_total FROM transactions;
-   
-  SET v_percent = (v_count/v_total) * 100;
-    
-  UPDATE account a SET a.amount=v_amount, a.statistic=v_percent WHERE a.id=p_account_id;
+  DECLARE v_amount decimal(8, 2);
+
+  SELECT
+    COUNT(id) INTO v_count
+  FROM transactions t
+  WHERE t.account_id = p_account_id;
+  SELECT
+    COUNT(id) INTO v_total
+  FROM transactions;
+
+  SET v_percent = (v_count / v_total) * 100;
+
+  UPDATE account a
+  SET a.amount = a.amount + p_amount,
+      a.statistic = v_percent
+  WHERE a.id = p_account_id;
 END
 $$
 
