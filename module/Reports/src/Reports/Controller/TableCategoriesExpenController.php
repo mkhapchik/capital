@@ -10,7 +10,11 @@ class TableCategoriesExpenController extends AbstractActionController
 	{
 		$categoryTable = $this->getCategoryTable();
 		$categoryTable->setType(0);
+		
+		$report = $this->getReport();
+		
 		$report_table = array();
+		$summary_table = array();
 		
 		$params = $this->params()->fromQuery();
 		$start 	= isset($params['start']) && !empty($params['start']) 	? 	strtotime($params['start']) : 	strtotime(date('Y-m-1') . "- 1 month");
@@ -23,6 +27,7 @@ class TableCategoriesExpenController extends AbstractActionController
 		$year_end = date('Y', $end);
 		$month_end = date('n', $end);
 		$day_end = date('d', $end);
+		
 		
 		for($y=$year_start; $y<=$year_end; $y++)
 		{
@@ -44,10 +49,12 @@ class TableCategoriesExpenController extends AbstractActionController
 				$result_end   = $d_end ? "$y-$m-$d_end" : 'null';
 				
 				$report_table[$y][$m] = $categoryTable->fetchAll($result_start, $result_end);
+				
+				$summary_table[$y][$m]= $report->getReportExpense($result_start, $result_end);
 			}
 		}
-		
-		return array('report_table'=>$report_table, 'start'=>date('d.m.Y',$start), 'end'=>date('d.m.Y',$end));
+
+		return array('report_table'=>$report_table, 'start'=>date('d.m.Y',$start), 'end'=>date('d.m.Y',$end), 'summary_table'=>$summary_table);
 		
 	}
 	
@@ -56,5 +63,12 @@ class TableCategoriesExpenController extends AbstractActionController
 		$sm = $this->getServiceLocator();
 		$categoryTable = $sm->get('CategoryTable');
 		return $categoryTable;
+	}
+	
+	private function getReport()
+	{
+		$sm = $this->getServiceLocator();
+		$report = $sm->get('Report');
+		return $report;
 	}
 }

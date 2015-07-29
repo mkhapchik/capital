@@ -1,6 +1,8 @@
 <?php
 namespace Reports;
 
+use Reports\Model\Report;
+
 class Module
 {
     public function getConfig()
@@ -18,4 +20,17 @@ class Module
             ),
         );
     }
+	
+	public function getServiceConfig()
+	{
+		return array(
+			'factories' => array(
+				'Report' => function ($sm) {
+					$report =  new Report();
+					return $report;
+				},
+			),
+		);
+	}
+	
 }

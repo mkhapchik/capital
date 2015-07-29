@@ -1,7 +1,7 @@
 ﻿--
 -- Скрипт сгенерирован Devart dbForge Studio for MySQL, Версия 6.3.358.0
 -- Домашняя страница продукта: http://www.devart.com/ru/dbforge/mysql/studio
--- Дата скрипта: 29.07.2015 9:21:00
+-- Дата скрипта: 29.07.2015 17:59:01
 -- Версия сервера: 5.5.23
 -- Версия клиента: 4.1
 --
@@ -102,8 +102,8 @@ CREATE TABLE session (
   UNIQUE INDEX UK_session_hash (token)
 )
 ENGINE = INNODB
-AUTO_INCREMENT = 101
-AVG_ROW_LENGTH = 512
+AUTO_INCREMENT = 105
+AVG_ROW_LENGTH = 455
 CHARACTER SET cp1251
 COLLATE cp1251_general_ci
 COMMENT = 'Сессия пользователей';
@@ -217,8 +217,8 @@ CREATE TABLE transactions (
     REFERENCES categories(id) ON DELETE NO ACTION ON UPDATE NO ACTION
 )
 ENGINE = INNODB
-AUTO_INCREMENT = 13
-AVG_ROW_LENGTH = 3276
+AUTO_INCREMENT = 14
+AVG_ROW_LENGTH = 2730
 CHARACTER SET cp1251
 COLLATE cp1251_general_ci
 COMMENT = 'Операции по счетам';
@@ -310,6 +310,38 @@ SELECT c.id, c.type, c.statistic, c.name, c.amount_limit,
 END IF;
 
 
+END
+$$
+
+--
+-- Описание для процедуры report_expense
+--
+DROP PROCEDURE IF EXISTS report_expense$$
+CREATE PROCEDURE report_expense(IN p_date_start date, IN p_date_end date)
+  SQL SECURITY INVOKER
+BEGIN
+  DECLARE v_date_start varchar(10); 
+  DECLARE v_date_end varchar(10);
+  DECLARE v_sum decimal(8, 0);
+  DECLARE v_limit_sum decimal(8, 0);
+
+
+  IF(p_date_start IS NULL) THEN
+    SET v_date_start = DATE_FORMAT(CURRENT_DATE() ,'%Y-%m-01 00.00.00');
+  ELSE
+    SET v_date_start = p_date_start;
+  END IF;
+
+  IF(p_date_end IS NULL) THEN
+    SET v_date_end = LAST_DAY(v_date_start);
+  ELSE
+    SET v_date_end = p_date_end;
+  END IF;
+
+  SELECT SUM(t.amount) AS sum INTO v_sum FROM transactions t INNER JOIN categories c ON t.categories_id=c.id WHERE t.date>=v_date_start AND t.date<=v_date_end AND c.type=0;
+  SELECT SUM(c.amount_limit) AS limit_sum INTO v_limit_sum FROM categories c;
+
+  SELECT v_sum as sum, v_limit_sum AS limit_sum, (v_limit_sum-v_sum) as balance;
 END
 $$
 

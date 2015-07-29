@@ -19,6 +19,14 @@
 		font-size:0.98em;
 	}
 	
+	#TableCategoriesExpen table .balance{
+		color:#2e83ff;
+	}
+	
+	#TableCategoriesExpen table .overflow{
+		color:#f00;
+	}
+	
 	#TableCategoriesExpen table td{
 		width: 80px;
 	}
@@ -66,6 +74,7 @@
 				<?php 
 					foreach($this->report_table as $year=>$val):
 					foreach($val as $month=>$category_list):
+					$summary = $summary_table[$year][$month][0];
 				?>
 				<li>
 					<h2><?=date('F, Y', strtotime('01-'.$month.'-'.$year));?></h2>
@@ -79,16 +88,25 @@
 						<?php
 							foreach($category_list as $category):
 						?>
-							<tr <?=$category['overflow']>0? "class='overflow'" : ''?>>
+							<tr>
 								<td><?=$category['name']?></td>
 								<td><?=$category['sum']?><span class="rub">Р</span></td>
 								<td><?=$category['amount_limit']?><span class="rub">Р</span></td>
-								<td><?=-$category['overflow']?><span class="rub">Р</span></td>
+								<td <?=$category['overflow']>0? "class='overflow'" : ''?>><?=-$category['overflow']?><span class="rub">Р</span></td>
 							</tr>
 						
 						<?php
 							endforeach;
 						?>
+						<tr>
+							<td><b>Итого:</b></td>
+							<td><?=$summary['sum']?><span class="rub">Р</span></td>
+							<td><?=$summary['limit_sum']?><span class="rub">Р</span></td>
+							<td class="<?=$summary['balance']<0? "balance overflow" : 'balance'?>"><b><?=$summary['balance']?></b><span class="rub">Р</span></td>
+						</tr>
+						
+						
+						
 					</table>
 				</li>
 				<?php
