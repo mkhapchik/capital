@@ -46,7 +46,7 @@ class TableCategoriesExpenController extends AbstractActionController
 				if($y==$year_end && $m==$month_end)$d_end = $day_end;
 												
 				$result_start = "$y-$m-$d_start";
-				$result_end   = $d_end ? "$y-$m-$d_end" : 'null';
+				$result_end   = $d_end ? "$y-$m-$d_end" : false;
 				
 				$report_table[$y][$m] = $categoryTable->fetchAll($result_start, $result_end);
 				
