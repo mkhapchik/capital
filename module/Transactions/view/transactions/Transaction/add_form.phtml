@@ -10,13 +10,14 @@
 	<h1><?=$header?></h1>
 	</header>
 	<div class="body">
-	
-	<div class="group template" style="display:none;">
-		<?php foreach($template as $t): ?><div class="form_element"><?=$this->formRow($t);?></div><?php endforeach;?>	
-		
-		<button class="remove" onclick="remove_transaction($(this), 400); return false;">-</button>
-		
-		<div class="clear"></div>
+	<div id="template" style="display:none;">
+		<div class="group ">
+			<?php foreach($template as $t): ?><div class="form_element"><?=$this->formRow($t);?></div><?php endforeach;?>	
+			
+			<button class="remove" onclick="remove_transaction($(this), 400); return false;">-</button>
+			
+			<div class="clear"></div>
+		</div>
 	</div>
 	
 	<?php if(!empty($message)):?>
@@ -52,6 +53,7 @@
     function new_transaction(duration) 
 	{
         duration = duration ? duration : 0;
+		/*
 		var currentCount = $('form > .group:not(.template)').length;
 		
 		var template = $('#transaction_block .template').clone(true, true);
@@ -65,12 +67,13 @@
 		else $('form').prepend(template);
 		template.show(duration);
         return false;
+		*/
     }
 	
 	function remove_transaction(btn, duration)
 	{
 		duration = duration ? duration : 0;
-		var currentCount = $('form > .group:not(.template)').length;
+		var currentCount = $('form .group').length;
 		if(currentCount>1) btn.parents('.group:eq(0)').hide(duration, function(){$(this).remove()});
 		return false;
 	}
@@ -100,11 +103,20 @@
 	$(document).ready(function(){
 		//new_transaction();
 		var currency_timeId;
+		
+		$('form#transaction_form').dynamicElement({
+			template_block : "#template",
+			template_placeholder: "__index__",
+			target_block : ".group",
+			buttons: []
+		});
+		
 		$('body').on('input', ".currency:not('.complite')", function(){
 			var currency = $(this);
 			clearTimeout(currency_timeId);
 			currency_timeId = setTimeout(function(){
-				new_transaction(500); 
+				//new_transaction(500); 
+				$('form#transaction_form').dynamicElement("add");
 				currency.addClass('complite');
 			},3000)	
 		});
