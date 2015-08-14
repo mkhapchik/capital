@@ -10,6 +10,8 @@ class AuthorizationController extends AbstractActionController
 	const CODE_ACCESS_IS_DENIED = 0;
 	const CODE_ACCESS_IS_DENIED_BY_TIMEOUT = -1;
 	const CODE_ACCESS_NULL = 2;
+	const CODE_ACCESS_IS_USER_BLOCKED = -2;
+	const CODE_ACCESS_IDENTITY_FAILED = -3;
 	
 	private $user;
 	

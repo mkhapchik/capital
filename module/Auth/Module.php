@@ -43,6 +43,12 @@ class Module
         $moduleRouteListener->attach($eventManager);
 
 		$eventManager->attach(MvcEvent::EVENT_ROUTE, array($this, 'checkAccess'));
+		
+       // session_start();
+        
+       // print_r(count($_SESSION['__ZF']));
+        
+		
     }
 	
 	
