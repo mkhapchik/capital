@@ -4,7 +4,7 @@ return array(
 		'max_counter_failures'=>3,
 		'success_login_redirect_router'=>'home',
 		'logout_redirect_router'=>'home',
-		'inactivity_time_min' => 4,
+		'inactivity_time_min' => 0.1,
 		'frequency_of_check_timeout_sec'=>5
 	),	
 	'controllers' => array(
