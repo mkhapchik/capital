@@ -14,8 +14,8 @@ class AuthorizationController extends AbstractActionController
 	const CODE_ACCESS_IDENTITY_FAILED = -3;
 	
 	private $user;
-	
 	private $session;
+	private $storage;
 	
 	/**
 	*  Проверка доступа
@@ -26,19 +26,113 @@ class AuthorizationController extends AbstractActionController
 	*/
 	public function checkAccess()
 	{
-		$config = $this->getServiceLocator()->get('config');
-		$authConfig = $config['auth'];
-		
 		$result = self::CODE_ACCESS_IS_DENIED;
-		
-		$serviceLocator = $this->getServiceLocator();
-		$authenticationService = $serviceLocator->get('AuthenticationService');
-		
-		if($authenticationService->hasIdentity())
-		{
-			$storage = $authenticationService->getStorage();
 			
-			if(!$storage->isEmpty()) 
+		$session = $this->getSession();
+				
+		if(isset($session->user_id))
+		{
+			$this->setUser($session->user_id);
+
+			if($this->checkTimeout())
+			{
+				$result = self::CODE_ACCESS_IS_ALLOWED;
+				$this->updateLastActivity();
+			}
+			else
+			{
+				$result = self::CODE_ACCESS_IS_DENIED_BY_TIMEOUT;
+				$serviceLocator = $this->getServiceLocator();
+				$authenticationController = $serviceLocator->get('AuthenticationController');
+				$authenticationController->logoutAction(false, SessionTable::METHOD_CLOSE_TIMEOUT);
+			}
+		}
+
+		return $result;
+	}
+	
+	private function updateLastActivity()
+	{
+		$serviceLocator = $this->getServiceLocator();
+		$sessionTable = $serviceLocator->get('SessionTable');
+		$session = $this->getSession();
+				
+		$newLastActivity = time();
+		$sessionTable->save(array('last_activity'=>date('Y-m-d H:i:s',$newLastActivity)), $session->id);
+		
+		$this->updateStorage($session->token, $newLastActivity);
+	}
+	
+	private function updateStorage($token, $last_activity)
+	{
+		$storage = $this->getStorage();
+		$storage->clear();
+		$storage->write(array('token'=>$token, 'last_activity'=>$last_activity));
+	}
+	
+
+	public function checkTimeoutAction()
+	{
+		$result = false;
+		$storage = $this->getStorage();
+		if($storage && !$storage->isEmpty())
+		{
+			$storage_data = $storage->read();
+			
+			$lastActivity = isset($storage_data['last_activity']) ? $storage_data['last_activity'] : 0;
+			
+			$config = $this->getServiceLocator()->get('config');
+			$inactivityTime = $config['auth']['inactivity_time_min']*60;
+			
+			if((time()-$lastActivity)>$inactivityTime)
+			{
+				if($this->checkTimeout())
+				{
+					$session = $this->getSession();
+					if($session) $this->updateStorage($session->token, $session->last_activity);
+				}
+				else
+				{
+					$result = true;
+				}
+			}
+		}
+		
+		if($result===false)
+		{
+			echo 0;
+			exit();
+		}
+		else
+		{
+			$view = $this->forward()->dispatch('Auth\Controller\Authentication', array(
+				'action' => 'login',
+				'is_success'=>0,
+				'codeAccess'=>self::CODE_ACCESS_IS_DENIED_BY_TIMEOUT
+			));
+			$view->setTerminal(true);
+			return $view;
+		}
+		
+	}
+	
+	public function getUser()
+	{
+		return isset($this->user) ? $this->user : false;
+	}
+	
+	/**
+	* получение сессии
+	*/
+	private function getSession()
+	{
+		if(!isset($this->session))
+		{
+			$this->session=false;
+			$serviceLocator = $this->getServiceLocator();
+			$storage = $this->getStorage();
+		
+			if($storage && !$storage->isEmpty()) 
 			{
 				$storage_data = $storage->read();
 				if(isset($storage_data['token'])) 
@@ -50,85 +144,53 @@ class AuthorizationController extends AbstractActionController
 					$ip = $remote->getIpAddress();
 					
 					$this->session = $sessionTable->getSession($token, $ip);
-					
-					if(isset($this->session->user_id))
-					{
-						$userTable = $serviceLocator->get('UserTable');
-						$this->user = $userTable->get($this->session->user_id);
-						
-						$inactivityTime = $authConfig['inactivity_time_min']*60;
-						$lastActivity = strtotime($this->session->lastActivity);
-									
-						if((time()-$lastActivity)<=$inactivityTime)
-						{
-							$result = self::CODE_ACCESS_IS_ALLOWED;
-							$newLastActivity = time();
-							$sessionTable->save(array('last_activity'=>date('Y-m-d H:i:s',$newLastActivity)), $this->session->id);
-							$storage->clear();
-							$storage->write(array('token'=>$token, 'last_activity'=>$newLastActivity));		
-						}
-						else
-						{
-							$result = self::CODE_ACCESS_IS_DENIED_BY_TIMEOUT;
-							$authenticationController = $serviceLocator->get('AuthenticationController');
-							$authenticationController->logoutAction(false, SessionTable::METHOD_CLOSE_TIMEOUT);
-						}
-					}
 				}
 			}
+
 		}
 		
-		return $result;
+		return $this->session;
 	}
 	
-	public function checkTimeoutAction()
+	/**
+	* Получение php сессии аутентификации
+	*/
+	private function getStorage()
 	{
-		$authService = $this->getServiceLocator()->get('AuthenticationService');
-		$storage = $authService->getStorage();
-		
-		if(!$storage->isEmpty())
+		if(!isset($this->storage))
 		{
-			$storage_data = $storage->read();
+			$serviceLocator = $this->getServiceLocator();
+			$authenticationService = $serviceLocator->get('AuthenticationService');
 			
-			$lastActivity = isset($storage_data['last_activity']) ? $storage_data['last_activity'] : 0;
-			
-			$config = $this->getServiceLocator()->get('config');
-			$authConfig = $config['auth'];
-			$inactivityTime = $authConfig['inactivity_time_min']*60;
-			
-			if((time()-$lastActivity)<=$inactivityTime)
-			{
-				$result = false;
-			}
-			else
-			{
-				$view = $this->forward()->dispatch('Auth\Controller\Authentication', array(
-					'action' => 'login',
-					'is_success'=>0,
-					'codeAccess'=>self::CODE_ACCESS_IS_DENIED_BY_TIMEOUT
-				));
-				$view->setTerminal(true);
-				return $view;
-			}
+			if($authenticationService->hasIdentity()) $this->storage = $authenticationService->getStorage();
+			else $this->storage = false;
 		}
-		else $result = false;
+		return $this->storage;
+	}
+	
+	/**
+	* Установка объекта user
+	*/
+	private function setUser($id)
+	{
+		$serviceLocator = $this->getServiceLocator();
+		$userTable = $serviceLocator->get('UserTable');
+		$this->user = $userTable->get($id);
+	}
+	
+	
+	/**
+	* Проверка таймаута
+	*/
+	private function checkTimeout()
+	{
+		$config = $this->getServiceLocator()->get('config');
+		$session = $this->getSession();
 		
-		if(!$result)
-		{
-			echo 0;
-			exit();
-		}
-		else return $result;
-	}
-	
-	public function getUser()
-	{
-		return isset($this->user) ? $this->user : false;
-	}
-	
-	public function getSession()
-	{
-		return isset($this->session) ? $this->session : false;
+		$inactivityTime = $config['auth']['inactivity_time_min']*60;
+		$lastActivity = strtotime($session->lastActivity);
+		
+		return ((time()-$lastActivity)<=$inactivityTime);
 	}
 
 }

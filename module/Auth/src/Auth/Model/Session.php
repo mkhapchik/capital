@@ -5,11 +5,11 @@ class Session
 {
 	public $id;
 	public $user_id;
-	protected $token;
-	protected $ip;
-	protected $starttime;
-	protected $endtime; 
-	protected $closed;
+	public $token;
+	public $ip;
+	public $starttime;
+	public $endtime; 
+	public $closed;
 	public $lastActivity;
 	 
     public function exchangeArray($data)
