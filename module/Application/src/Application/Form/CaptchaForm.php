@@ -28,7 +28,7 @@ abstract class CaptchaForm extends Form
 
 	public function getCounter()	
 	{
-		$formCont = new Container('form');
+		$formCont = new Container($this->getFormNamespace());
 		if(isset($formCont->counter)) $counter = $formCont->counter;
 		else $counter = 0;
 		
@@ -37,15 +37,20 @@ abstract class CaptchaForm extends Form
 	
 	public function incrementCounter()
 	{
-		$formCont = new Container('form');
+		$formCont = new Container($this->getFormNamespace());
 		if(isset($formCont->counter)) $formCont->counter++;
 		else $formCont->counter = 1;
 	}
 	
 	public function resetCounter()
 	{
-		$formCont = new Container('form');
+		$formCont = new Container($this->getFormNamespace());
 		$formCont->counter=0;
+	}
+	
+	protected function getFormNamespace()
+	{
+		return get_class($this);
 	}
 	
 	public function addCaptcha()

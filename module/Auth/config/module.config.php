@@ -59,7 +59,19 @@ return array(
 								'action'        => 'checkTimeout',
                             ),
                         ),	
-					)
+					),
+					'refresh_captcha'=>array(
+						'type'    => 'Literal',
+                        'options' => array(
+                            'route'    => '/refresh_captcha',
+                            'defaults' => array(
+								'__NAMESPACE__' => 'Auth\Controller',
+								'controller'    => 'Authentication',
+								'action'        => 'refreshcaptcha',
+                            ),
+                        ),	
+					),
+					
 					
                 ),
 			),	

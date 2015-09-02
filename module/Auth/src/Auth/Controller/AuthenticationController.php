@@ -127,6 +127,8 @@ class AuthenticationController extends AbstractActionController
 				
 			}
 		}
+		
+		$this->layout()->setVariable('title', 'Аутентификация');
 		$view = new ViewModel(array('form' => $form, 'is_success'=>$is_success, 'message'=>$message, 'is_xmlhttprequest' => $is_xmlhttprequest));
 		return $view;
 	}
@@ -188,5 +190,17 @@ class AuthenticationController extends AbstractActionController
 			$authConfig = $config['auth'];
 			$this->redirect()->toRoute($authConfig['logout_redirect_router']);
 		}
+	}
+	
+	public function refreshcaptchaAction()
+	{
+		$form = new LoginForm('loginForm');
+		$captcha = $form->get('captcha')->getCaptcha();
+		$suf = $captcha->getSuffix();
+		$id = $captcha->generate();
+		$img_url = $captcha->getImgUrl();
+		$src = $img_url.$id.$suf;
+		echo json_encode(array('captcha_src'=>$src, 'captcha_id'=>$id));
+		exit();
 	}
 }
