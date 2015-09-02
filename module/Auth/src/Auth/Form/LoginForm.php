@@ -1,16 +1,19 @@
 <?php
 namespace Auth\Form;
  
-use Zend\Form\Form;
+//use Zend\Form\Form;
+use Application\Form\CaptchaForm;
 use Zend\InputFilter\Factory as InputFactory;
 use Zend\InputFilter\InputFilter;
 use Zend\Validator\StringLength;
 use Zend\Validator\NotEmpty;
 
  
-class LoginForm extends Form
+//class LoginForm extends Form
+class LoginForm extends CaptchaForm
 {
-    public function __construct($name = null)
+    /*
+	public function __construct($name = null)
     {
         parent::__construct($name);
         $this->setAttribute('method', 'post');
@@ -77,8 +80,36 @@ class LoginForm extends Form
 		$inputFilter = $this->__getInputFilter();
 		$this->setInputFilter($inputFilter);
     }
+	*/
+	protected function initForm()
+	{
+		$this->setAttribute('method', 'post');
+       
+		$this->add(array(
+            'name' => 'login',
+            'attributes' => array(
+                'type'  => 'text',
+            ),
+            'options' => array(
+                'label' => 'Логин',
+            ),
+			
+        ));
+		
+		$this->add(array(
+            'name' => 'pwd',
+            'attributes' => array(
+                'type'  => 'password',
+            ),
+			'options' => array(
+                'label' => 'Пароль',
+            ),
+			
+        ));
+		
+	}
 	
-	private function __getInputFilter()
+	protected function __getInputFilter()
 	{
 		$inputFilter = new InputFilter();
 		$factory     = new InputFactory();

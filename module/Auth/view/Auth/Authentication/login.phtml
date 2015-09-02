@@ -22,8 +22,10 @@
 	$form = $this->form;
 	$form->prepare();
 	echo $this->form()->openTag($form);
+	//$form->get('login')->setOrder(10);
 	foreach($form as $el):
 	?>
+			
 		<div class="form_element <?=$el->getName()?>">
 			<?=$this->formRow($el)?>
 		</div>

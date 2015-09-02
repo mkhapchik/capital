@@ -29,9 +29,11 @@ class AuthenticationController extends AbstractActionController
             try
 			{
 				$form->setData($request->getPost());
-	 
+				
 				if ($form->isValid()) 
 				{
+					$form->resetCounter();
+					
 					$dataForm = $form->getData();
 					$login = $dataForm['login'];
 					$pwd = $dataForm['pwd'];
@@ -112,6 +114,9 @@ class AuthenticationController extends AbstractActionController
 			}
 			catch(Exception $e)
 			{
+				if($form->getCounter()==0) $form->addCaptcha();
+				$form->incrementCounter();
+				
 				$code = $e->getMessage();
 				$message = $this->getMessageByCode($code);
 				$is_success=0;
