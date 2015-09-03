@@ -5,6 +5,21 @@
 		float:none;
 		padding-bottom:10px;
 	}
+	
+	a.refresh_captcha{
+		display:block;
+		clear:both;
+		float:left;
+		font-size:0.97em;
+		text-decoration:none;
+		border-bottom: 1px dashed #9299a2;
+		color:#9299a2 !important;
+	}
+	
+	a.refresh_captcha:active{
+		color:#009ecf !important;
+		border-bottom: 1px dashed #009ecf;
+	}
 </style>
 
 <section class="block b-form b-login">
@@ -23,12 +38,16 @@
 	$form->prepare();
 	echo $this->form()->openTag($form);
 	foreach($form as $el):
-	?>
+	$name = $el->getName();
+	?>	
+		<div class="form_element <?=$name?>">
+			<label>
+				<span><?=$el->getLabel()?></span>
+				<?=$this->formElement($el)?>
+				<?php if($name=='captcha'):?><a class="refresh_captcha" href="#">Обновить картинку</a><?php endif; ?>
+			</label>
 			
-		<div class="form_element <?=$el->getName()?>">
-			<?=$this->formRow($el)?>
 		</div>
-	
 	<?php endforeach; ?>
 	<div class="clear"></div>
 	</div>
@@ -50,5 +69,10 @@
 	
 	$('.captcha img').click(function(){
 		refresh_captcha($(this).closest('.captcha'));
+	});
+	
+	$('.captcha a.refresh_captcha').click(function(){
+		refresh_captcha($(this).closest('.captcha'));
+		return false;
 	});
 </script>
