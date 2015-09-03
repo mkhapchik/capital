@@ -81,14 +81,14 @@
 	function autocompleteCommentInit(input)
 	{
 		var str = input.val();
-		if(str.length<3)
+		if(str.length<2)
 		{
 			input.autocomplete( "option", "source", []);
 		}
 		else
 		{
 			$.ajax({
-				url: window.location.href+'/getComments',
+				url: '/transactions/expense/getComments',
 				method: 'post',
 				dataType: 'json',
 				data:{param:str},
