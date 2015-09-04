@@ -38,15 +38,10 @@
 	$form->prepare();
 	echo $this->form()->openTag($form);
 	foreach($form as $el):
-	$name = $el->getName();
-	?>	
-		<div class="form_element <?=$name?>">
-			<label>
-				<span><?=$el->getLabel()?></span>
-				<?=$this->formElement($el)?>
-				<?php if($name=='captcha'):?><a class="refresh_captcha" href="#">Обновить картинку</a><?php endif; ?>
-			</label>
-			
+	?>
+		<div class="form_element <?=$el->getName()?>">
+			<?=$this->formRow($el);?>
+			<?php if($el->getName()=='captcha'):?><a class="refresh_captcha" href="#">Обновить картинку</a><?php endif; ?>
 		</div>
 	<?php endforeach; ?>
 	<div class="clear"></div>

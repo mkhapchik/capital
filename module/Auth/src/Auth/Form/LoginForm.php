@@ -56,7 +56,7 @@ class LoginForm extends CaptchaForm
 						'name' =>'NotEmpty', 
                         'options' => array(
                            	'messages' => array(
-                               NotEmpty::IS_EMPTY => '' 
+                               NotEmpty::IS_EMPTY => 'Поле "Логин" обязательно для заполнения.' 
                             ),
                         ),
 				),
@@ -66,7 +66,7 @@ class LoginForm extends CaptchaForm
 						'encoding' => 'UTF-8',
 						'max'      => 50,
 						'messages' => array(
-							//StringLength::TOO_LONG => 'Длина логина не должна превышать %max% символов'
+							StringLength::TOO_LONG => 'Длина логина не должна превышать %max% символов'
 						)
 					),
 				),
@@ -82,7 +82,7 @@ class LoginForm extends CaptchaForm
                       'name' =>'NotEmpty', 
                         'options' => array(
                             'messages' => array(
-                               NotEmpty::IS_EMPTY => '' 
+                               NotEmpty::IS_EMPTY => 'Поле "Пароль" обязательно для заполнения.' 
                             ),
                         ),
 				),

@@ -97,6 +97,28 @@ abstract class AbstractTransactionController extends AbstractActionController
 		exit();
 	}
 	
+	public function viewAction()
+	{
+		$transactionTable = $this->getTransactionTable();
+		$transactionTable->setType($this->type);
+		
+		$paginator = $transactionTable->getTransaction(true);
+		
+		$paginator->setCurrentPageNumber((int) $this->params()->fromQuery('page', 1));
+		
+		$paginator->setItemCountPerPage(10);
+		
+		$routName   = $this->getEvent()->getRouteMatch()->getMatchedRouteName();
+		
+		$routeParams = array('action' => 'view');
+		
+		return new ViewModel(array(
+			'paginator' => $paginator,
+			'routName' => $routName,
+			'routeParams'=>$routeParams
+		));
+	}
+	
 	protected function getCategories()
 	{
 		$sm = $this->getServiceLocator();

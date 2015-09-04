@@ -1,7 +1,8 @@
 <?php
 namespace Transactions\Model;
 
-use Transactions\Model\AbstractTable;
+//use Transactions\Model\AbstractTable;
+use Application\Model\AbstractTable;
 use Transactions\Entity\Transaction;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\Sql\Select;
@@ -58,6 +59,23 @@ class TransactionTable extends AbstractTable
 		});
 		
 		return $resultSet->toArray();
+	}
+	
+	public function getTransaction($paginated=false)
+	{
+		$select = new Select();
+		$select->from(array('t' => $this->table));
+		$select->join(array('c' => 'categories'), 'c.id = t.categories_id', array('categories_name'=>'name'));
+		$select->join(array('a' => 'account'), 'a.id = t.account_id', array('account_name'=>'name'));
+		
+		if(isset($this->type))
+		{
+			$op_sign = $this->type==1 ? 1 : -1;
+			$select->where(array('t.op_sign'=>$op_sign));
+		}
+		
+		$select->order(array('t.date'=>'DESC'));
+		return $this->getPaginator($select);
 	}
 }
 ?>

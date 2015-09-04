@@ -37,13 +37,31 @@ abstract class AbstractTable extends AbstractTableGateway implements AdapterAwar
 	/**
 	* Fetch all records from the table
 	*/
-    public function fetchAll($where=null)
+    public function fetchAll($where=null, $paginated=false)
 	{
-		$resultSet = $this->select($where);
-		$resultSet->setObjectPrototype($this->objectPrototype);
-		return $resultSet->toArray();
+		if($paginated) 
+		{
+            $select = new Select($this->table);
+			$select->where($where);
+            $paginator = $this->getPaginator($select);
+			return $paginator;
+        }
+		else
+		{
+			$resultSet = $this->select($where);
+			$resultSet->setObjectPrototype($this->objectPrototype);
+			return $resultSet->toArray();
+		}
 	}
-    
+	
+	protected function getPaginator(Select $select)
+	{
+		$paginatorAdapter = new \Zend\Paginator\Adapter\DbSelect($select, $this->getAdapter(), $this->resultSetPrototype);
+		$paginator = new \Zend\Paginator\Paginator($paginatorAdapter);
+            
+		return $paginator;
+	}
+	    
 	/**
 	* Getting a table row by id
 	* @param $id - ID string

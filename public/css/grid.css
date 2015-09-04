@@ -205,3 +205,23 @@ footer{
 .success{
 	color:#2E83FF;
 }
+
+/** pagination **/
+ul.pagination{
+	clear:both;
+	display:block;
+	margin-top:15px;
+}
+
+ul.pagination li{
+	list-style:none;
+	float:left;
+	margin-left:6px;
+}
+
+ul.pagination li:first-child{
+	margin-left:0;
+}
+
+
+/**end pagination **/

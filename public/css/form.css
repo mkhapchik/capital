@@ -11,6 +11,7 @@
 	float:left;
 	clear:both;
 	width:100%;
+	position:relative;
 }
 
 .b-form .form_element label{
@@ -94,20 +95,6 @@
 
 }
 
-.b-form .form_element > ul{
-	float:right;
-	padding:0;
-}
-
-.b-form .form_element > ul li{
-	font-size: 0.8em;
-	/*list-style:none;*/
-	color:#9a1b1e;
-	width:200px;
-	
-	
-}
-
 .b-form input.date{	
 	/*float:left;*/
 	/*border-radius:5px 0	0 5px;*/
@@ -131,6 +118,9 @@ img.ui-datepicker-trigger{
 	width: auto;
 	clear: none;
 	padding:5px;
+	font-size: 0.9em;
+	position:relative;
+	margin-bottom:5px;
 }
 
 .b-form-inline .form_element input.date{
@@ -164,28 +154,25 @@ img.ui-datepicker-trigger{
 	font-size: 0.9em;
 }
 
-.b-form-inline .form_element{
-	font-size: 0.9em;
-	position:relative;
-	margin-bottom:5px;
-	
-}
-
 .b-form .form_element > ul{
 	float:none;
 	padding:0;
+	/*
 	position:absolute;
 	bottom: -6px;
-	right:5px;
-	
+    right:5px;
+	*/
 }
 
 .b-form .form_element > ul li{
 	font-size: 0.8em;
-	/*list-style:none;*/
 	color:#9a1b1e;
-	width:200px;
 	
+	/*white-space:nowrap;*/
+	
+	display:block;
+	float:right;
+	clear:both;
 	
 }
 
