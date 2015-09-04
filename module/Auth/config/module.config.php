@@ -2,10 +2,17 @@
 return array(
 	'auth'=>array(
 		'max_counter_failures'=>3,
-		'success_login_redirect_router'=>'home',
-		'logout_redirect_router'=>'home',
+		'success_redirect'=>array(
+			'route_name' => 'home',
+			'route_params'=>array()
+		),
+		'logout_redirect'=>array(
+			'route_name' => 'home',
+			'route_params'=>array()
+		),
 		'inactivity_time_min' => 100,
-		'frequency_of_check_timeout_sec'=>5
+		'frequency_of_check_timeout_sec'=>5,
+		'max_count_refresh_captcha'=>3
 	),	
 	'controllers' => array(
         'invokables' => array(

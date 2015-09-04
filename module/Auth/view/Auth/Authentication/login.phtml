@@ -39,7 +39,7 @@
 	echo $this->form()->openTag($form);
 	foreach($form as $el):
 	?>
-		<div class="form_element <?=$el->getName()?>">
+		<div class="form_element <?=$el->getName()?>" id="<?=$el->getName()?>">
 			<?=$this->formRow($el);?>
 			<?php if($el->getName()=='captcha'):?><a class="refresh_captcha" href="#">Обновить картинку</a><?php endif; ?>
 		</div>
@@ -56,8 +56,16 @@
 			url:'/auth/refresh_captcha',
 			dataType:'json',
 			success: function(res){
-				captcha_cont.find('img').attr('src', res.captcha_src);
-				captcha_cont.find("input[name='captcha[id]']").val(res.captcha_id);
+				if(res.captcha_id!=false)
+				{
+					captcha_cont.find('img').attr('src', res.captcha_src);
+					captcha_cont.find("input[name='captcha[id]']").val(res.captcha_id);
+				}
+				else
+				{
+					$('.captcha img').unbind('click');
+					$('.captcha a.refresh_captcha').remove();
+				}
 			}
 		});
 	}
@@ -71,3 +79,38 @@
 		return false;
 	});
 </script>
+
+<?php if($codeAccess==\Auth\Controller\AuthorizationController::CODE_ACCESS_IS_DENIED_BY_TIMEOUT): 
+// временная заглушка до реализации ajax для работы с формой
+?>
+<script>
+	$(document).ready(function(){
+		$('#loginForm').submit(function(){
+			var form = $(this);
+			var data = {};
+			data.login = $('#login input').val();
+			data.pwd = $('#pwd input').val();
+			if($('#captcha').length>0)
+			{
+				data.captcha.input = $('#captcha').find("input[name='captcha[input]']").val();
+				data.captcha.id = $('#captcha').find("input[name='captcha[id]']").val();
+			}
+			data.submit=1;
+						
+			$.ajax({
+				method : 'post',
+				url : form.attr('action'),
+				data:data,
+				dataType:'json',
+				success: function(res){
+					//alert(res.message);
+					location.reload();
+				}
+				
+			});
+			return false;
+		});
+		
+	});
+</script>	
+<?php endif; ?>

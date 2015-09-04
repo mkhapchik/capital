@@ -68,11 +68,11 @@ abstract class CaptchaForm extends Form
 					'font'=>'./data/captcha/font/arial.ttf',
 					'imgUrl'=>'/img/captcha/',
 					'imgDir'=>'public/img/captcha/',
-					//'gcFreq'=>'1',
-                    //'expiration'=>'1',
+					'gcFreq'=>'1', // частота вызова сборщика мусора
+                    'expiration'=>'60', //время актуальности файлов изображений капчи
+					'timeout'=>'60', // время жизни сессии
                     'wordlen'=>'4',
-                    //'timeout'=>'1',
-                    'keepSession'=>false,
+                    'keepSession'=>false, //создать одну сессию ?????????
 					'width'=>120,
 					'height' => 50,
 					'fontSize'=>20,

@@ -4,6 +4,7 @@ namespace Auth\Controller;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 use Zend\Authentication\Storage\Session as SessionAuth;
+use Zend\Session\Container;
 use Auth\Form\LoginForm;
 use Auth\Controller\AuthorizationController;
 use Auth\Model\SessionTable;
@@ -23,6 +24,7 @@ class AuthenticationController extends AbstractActionController
 		
         $request = $this->getRequest();
 		$is_xmlhttprequest = $request->isXmlHttpRequest();
+		
 		
 		if ($request->isPost() && $request->getPost('submit', false)!==false) 
 		{
@@ -91,13 +93,26 @@ class AuthenticationController extends AbstractActionController
 													
 							$sessionTable->save($sessionData);
 							
+							$this->resetCountRefreshCaptcha();
+							
 							if($is_xmlhttprequest)
 							{		
 								
 							}
 							else
 							{
-								$this->redirect()->toRoute($authConfig['success_login_redirect_router']);
+								if($codeAccess==AuthorizationController::CODE_ACCESS_NULL)
+								{
+									$route_success_redirect_name = $authConfig['success_redirect']['route_name'];
+									$route_success_redirect_params = $authConfig['success_redirect']['route_params'];
+									$this->redirect()->toRoute($route_success_redirect_name, $route_success_redirect_params);
+								}
+								else
+								{
+									$header = $this->params()->fromHeader();
+									$url = $header['Referer'];
+									$this->redirect()->toUrl($url);
+								}
 							}
 						}
 					}
@@ -124,12 +139,16 @@ class AuthenticationController extends AbstractActionController
 			
 			if($is_xmlhttprequest)
 			{		
-				
+				echo json_encode(array('is_success'=>$is_success, 'message'=>$message));
+				exit();
 			}
 		}
 		
+		
+		
+		
 		$this->layout()->setVariable('title', 'Аутентификация');
-		$view = new ViewModel(array('form' => $form, 'is_success'=>$is_success, 'message'=>$message, 'is_xmlhttprequest' => $is_xmlhttprequest));
+		$view = new ViewModel(array('form' => $form, 'is_success'=>$is_success, 'message'=>$message, 'is_xmlhttprequest' => $is_xmlhttprequest, 'codeAccess'=>$codeAccess));
 		return $view;
 	}
 	
@@ -188,19 +207,60 @@ class AuthenticationController extends AbstractActionController
 		{
 			$config = $this->getServiceLocator()->get('config');
 			$authConfig = $config['auth'];
-			$this->redirect()->toRoute($authConfig['logout_redirect_router']);
+			
+			$route_logout_redirect_name = $authConfig['logout_redirect']['route_name'];
+			$route_logout_redirect_params = $authConfig['logout_redirect']['route_params'];
+			$this->redirect()->toRoute($route_logout_redirect_name, $route_logout_redirect_params);
 		}
 	}
 	
 	public function refreshcaptchaAction()
 	{
-		$form = new LoginForm('loginForm');
-		$captcha = $form->get('captcha')->getCaptcha();
-		$suf = $captcha->getSuffix();
-		$id = $captcha->generate();
-		$img_url = $captcha->getImgUrl();
-		$src = $img_url.$id.$suf;
+		$config = $this->getServiceLocator()->get('config');
+		$max_count_refresh_captcha = $config['auth']['max_count_refresh_captcha'];
+		$ref_captcha_counter = new Container(__CLASS__);
+		
+		$src = false;
+		$id=false;
+		
+		if($this->getCountRefreshCaptcha()<$max_count_refresh_captcha)
+		{
+			$this->incrementCountRefreshCaptcha();
+		
+			$form = new LoginForm('loginForm');
+			$captcha_element = $form->get('captcha');
+			if($captcha_element)
+			{
+				$captcha = $captcha_element->getCaptcha();
+				$suf = $captcha->getSuffix();
+				$id = $captcha->generate();
+				$img_url = $captcha->getImgUrl();
+				$src = $img_url.$id.$suf;
+			}
+		}
+		
 		echo json_encode(array('captcha_src'=>$src, 'captcha_id'=>$id));
 		exit();
 	}
+	
+	private function getCountRefreshCaptcha()
+	{
+		$ref_captcha_counter = new Container(__CLASS__);
+		if(isset($ref_captcha_counter->counter)) return $ref_captcha_counter->counter;
+		else return 0;
+	}
+	
+	private function incrementCountRefreshCaptcha()
+	{
+		$ref_captcha_counter = new Container(__CLASS__);
+		if(!isset($ref_captcha_counter->counter)) $ref_captcha_counter->counter=1;
+		else $ref_captcha_counter->counter++;
+	}
+	
+	private function resetCountRefreshCaptcha()
+	{
+		$ref_captcha_counter = new Container(__CLASS__);
+		$ref_captcha_counter->getManager()->getStorage()->clear(__CLASS__);
+	}
+	
 }

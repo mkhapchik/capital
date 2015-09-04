@@ -13,7 +13,15 @@
 					clearInterval(timerId);
 					var div = $('<div/>');
 					div.html(result);
-					div.dialog({width:'400px', minHeight:'400px'});
+					div.dialog({
+						width:'400px', 
+						minHeight:'400px', 
+						modal: true, 
+						closeOnEscape: false, 
+						close:function(){
+							location.reload();
+						}
+					});
 				}
 			}
 		});
