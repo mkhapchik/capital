@@ -55,40 +55,43 @@ abstract class CaptchaForm extends Form
 	
 	public function addCaptcha()
 	{
-		$this->add(array(
-			'type' => 'Captcha',
-			'name' => 'captcha',
-			
-			'options' => array(
-				'label' => 'Введите код с картинки',
-				'priority'=>1,
-				'captcha' => array(
-                    //'class' => 'Dumb',
-					'class' => 'Image',
-					'font'=>'./data/captcha/font/arial.ttf',
-					'imgUrl'=>'/img/captcha/',
-					'imgDir'=>'public/img/captcha/',
-					'gcFreq'=>'1', // частота вызова сборщика мусора
-                    'expiration'=>'60', //время актуальности файлов изображений капчи
-					'timeout'=>'60', // время жизни сессии
-                    'wordlen'=>'4',
-                    'keepSession'=>false, //создать одну сессию ?????????
-					'width'=>120,
-					'height' => 50,
-					'fontSize'=>20,
-					'dotNoiseLevel' => 70,
-					//'lineNoiseLevel' => 0
-					//'class'=>'Figlet'
-					'messages' => array(
-						\Zend\Captcha\AbstractWord::BAD_CAPTCHA => "",
-						\Zend\Captcha\AbstractWord::MISSING_VALUE => "",
-						\Zend\Captcha\AbstractWord::MISSING_ID => "",
+		if(!$this->has('captcha'))
+		{
+			$this->add(array(
+				'type' => 'Captcha',
+				'name' => 'captcha',
+				
+				'options' => array(
+					'label' => 'Введите код с картинки',
+					'priority'=>1,
+					'captcha' => array(
+						//'class' => 'Dumb',
+						'class' => 'Image',
+						'font'=>'./data/captcha/font/arial.ttf',
+						'imgUrl'=>'/img/captcha/',
+						'imgDir'=>'public/img/captcha/',
+						'gcFreq'=>'1', // частота вызова сборщика мусора
+						'expiration'=>'60', //время актуальности файлов изображений капчи
+						'timeout'=>'60', // время жизни сессии
+						'wordlen'=>'4',
+						'keepSession'=>false, //создать одну сессию ?????????
+						'width'=>120,
+						'height' => 50,
+						'fontSize'=>20,
+						'dotNoiseLevel' => 70,
+						//'lineNoiseLevel' => 0
+						//'class'=>'Figlet'
+						'messages' => array(
+							\Zend\Captcha\AbstractWord::BAD_CAPTCHA => "",
+							\Zend\Captcha\AbstractWord::MISSING_VALUE => "",
+							\Zend\Captcha\AbstractWord::MISSING_ID => "",
+						),
+						
 					),
 					
-                ),
-				
-			)
-		));
+				)
+			));
+		}
 	}
 	
 	protected function addButtons()
