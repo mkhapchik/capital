@@ -80,7 +80,7 @@
 	});
 </script>
 
-<?php if($codeAccess==\Auth\Controller\AuthorizationController::CODE_ACCESS_IS_DENIED_BY_TIMEOUT): 
+<?php if($is_ajax): 
 // временная заглушка до реализации ajax для работы с формой
 ?>
 <script>
@@ -103,8 +103,14 @@
 				data:data,
 				dataType:'json',
 				success: function(res){
-					//alert(res.message);
-					location.reload();
+					if(res.is_success)
+					{
+						$('.ui-dialog-content').dialog( "destroy" );
+					}
+					else
+					{
+						location.reload();	
+					}
 				}
 				
 			});

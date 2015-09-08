@@ -105,7 +105,8 @@ class AuthorizationController extends AbstractActionController
 				$view = $this->forward()->dispatch('Auth\Controller\Authentication', array(
 					'action' => 'login',
 					'is_success'=>0,
-					'codeAccess'=>self::CODE_ACCESS_IS_DENIED_BY_TIMEOUT
+					'codeAccess'=>self::CODE_ACCESS_IS_DENIED_BY_TIMEOUT,
+					'is_ajax'=>true
 				));
 				$view->setTerminal(true);
 				return $view;

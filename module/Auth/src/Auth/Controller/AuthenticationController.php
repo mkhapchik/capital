@@ -17,7 +17,9 @@ class AuthenticationController extends AbstractActionController
 	{
 		$codeAccess = $this->params()->fromRoute('codeAccess', AuthorizationController::CODE_ACCESS_NULL);
 		$is_success = $this->params()->fromRoute('is_success', 1);
-				
+		$is_ajax = $this->params()->fromRoute('is_ajax', 0);		
+
+			
 		$message = $this->getMessageByCode($codeAccess);
 
 		$form = new LoginForm('loginForm');
@@ -97,7 +99,8 @@ class AuthenticationController extends AbstractActionController
 							
 							if($is_xmlhttprequest)
 							{		
-								
+								$is_success=1;
+								$message = '';
 							}
 							else
 							{
@@ -143,12 +146,9 @@ class AuthenticationController extends AbstractActionController
 				exit();
 			}
 		}
-		
-		
-		
-		
+				
 		$this->layout()->setVariable('title', 'Аутентификация');
-		$view = new ViewModel(array('form' => $form, 'is_success'=>$is_success, 'message'=>$message, 'is_xmlhttprequest' => $is_xmlhttprequest, 'codeAccess'=>$codeAccess));
+		$view = new ViewModel(array('form' => $form, 'is_success'=>$is_success, 'message'=>$message, 'is_xmlhttprequest' => $is_xmlhttprequest, 'codeAccess'=>$codeAccess, 'is_ajax'=>$is_ajax));
 		return $view;
 	}
 	

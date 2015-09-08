@@ -74,6 +74,8 @@ class Module
 				$routeMatch->setParam('action', 'login');
 				$routeMatch->setParam('codeAccess', $codeAccess);
 				$routeMatch->setParam('is_success', 0);
+				$routeMatch->setParam('is_ajax', 0);
+				
 			}
 		}
 	}
