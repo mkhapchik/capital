@@ -7,6 +7,7 @@ use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
 use Auth\Model\UserTable;
 use Auth\Model\SessionTable;
+use Auth\Model\IpAllowedListTable;
 use Auth\Controller\AuthorizationController;
 use Auth\Controller\AuthenticationController;
 use Zend\View\Model\ViewModel;
@@ -96,12 +97,13 @@ class Module
 					return $authService;
 				},
 				'UserTable' => function ($sm) {
-					$userTable =  new UserTable();
-					return $userTable;
+					return new UserTable();
 				},
 				'SessionTable' => function ($sm) {
-					$sessionTable =  new SessionTable();
-					return $sessionTable;
+					return new SessionTable();
+				},
+				'IpAllowedListTable' => function($sm){
+					return new IpAllowedListTable();
 				},
 				'AuthorizationController'=>function($sm){
 					return new AuthorizationController();
@@ -109,7 +111,6 @@ class Module
 				'AuthenticationController'=>function($sm){
 					return new AuthenticationController();
 				}
-				
 			),
 		);
 	}

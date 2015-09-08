@@ -12,6 +12,7 @@ class AuthorizationController extends AbstractActionController
 	const CODE_ACCESS_NULL = 2;
 	const CODE_ACCESS_IS_USER_BLOCKED = -2;
 	const CODE_ACCESS_IDENTITY_FAILED = -3;
+	const CODE_ACCESS_IS_DENIED_BY_IP_NOT_IN_ALLOWED_LIST = -4;
 	
 	private $user;
 	
@@ -43,36 +44,43 @@ class AuthorizationController extends AbstractActionController
 				$storage_data = $storage->read();
 				if(isset($storage_data['token'])) 
 				{
-					$sessionTable = $serviceLocator->get('SessionTable');
-					$token = $storage_data['token'];
-					
 					$remote = new \Zend\Http\PhpEnvironment\RemoteAddress();
 					$ip = $remote->getIpAddress();
 					
-					$this->session = $sessionTable->getSession($token, $ip);
-					
-					if(isset($this->session->user_id))
+					if($this->checkIpInAllowedLists($ip))
 					{
-						$userTable = $serviceLocator->get('UserTable');
-						$this->user = $userTable->get($this->session->user_id);
+						$sessionTable = $serviceLocator->get('SessionTable');
+						$token = $storage_data['token'];
+
+						$this->session = $sessionTable->getSession($token, $ip);
 						
-						$inactivityTime = $authConfig['inactivity_time_min']*60;
-						$lastActivity = strtotime($this->session->lastActivity);
-									
-						if((time()-$lastActivity)<=$inactivityTime)
+						if(isset($this->session->user_id))
 						{
-							$result = self::CODE_ACCESS_IS_ALLOWED;
-							$newLastActivity = time();
-							$sessionTable->save(array('last_activity'=>date('Y-m-d H:i:s',$newLastActivity)), $this->session->id);
-							$storage->clear();
-							$storage->write(array('token'=>$token, 'last_activity'=>$newLastActivity));		
+							$userTable = $serviceLocator->get('UserTable');
+							$this->user = $userTable->get($this->session->user_id);
+							
+							$inactivityTime = $authConfig['inactivity_time_min']*60;
+							$lastActivity = strtotime($this->session->lastActivity);
+										
+							if((time()-$lastActivity)<=$inactivityTime)
+							{
+								$result = self::CODE_ACCESS_IS_ALLOWED;
+								$newLastActivity = time();
+								$sessionTable->save(array('last_activity'=>date('Y-m-d H:i:s',$newLastActivity)), $this->session->id);
+								$storage->clear();
+								$storage->write(array('token'=>$token, 'last_activity'=>$newLastActivity));		
+							}
+							else
+							{
+								$result = self::CODE_ACCESS_IS_DENIED_BY_TIMEOUT;
+								$authenticationController = $serviceLocator->get('AuthenticationController');
+								$authenticationController->logoutAction(false, SessionTable::METHOD_CLOSE_TIMEOUT);
+							}
 						}
-						else
-						{
-							$result = self::CODE_ACCESS_IS_DENIED_BY_TIMEOUT;
-							$authenticationController = $serviceLocator->get('AuthenticationController');
-							$authenticationController->logoutAction(false, SessionTable::METHOD_CLOSE_TIMEOUT);
-						}
+					}
+					else
+					{
+						$result = self::CODE_ACCESS_IS_DENIED_BY_IP_NOT_IN_ALLOWED_LIST;
 					}
 				}
 			}
@@ -120,6 +128,23 @@ class AuthorizationController extends AbstractActionController
 			exit();
 		}
 		else return $result;
+	}
+	
+	public function checkIpInAllowedLists($ip)
+	{
+		$serviceLocator = $this->getServiceLocator();
+		$config = $serviceLocator->get('config');
+		$result=false;
+		if($config['auth']['use_allow_list_ip'])
+		{
+			$ipAllowedListTable = $serviceLocator->get('IpAllowedListTable');
+			$result = $ipAllowedListTable->is_allowed($ip);	
+		}
+		else
+		{
+			$result=true;
+		}
+		return $result;
 	}
 	
 	public function getUser()

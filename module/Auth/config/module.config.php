@@ -12,7 +12,8 @@ return array(
 		),
 		'inactivity_time_min' => 100,
 		'frequency_of_check_timeout_sec'=>5,
-		'max_count_refresh_captcha'=>3
+		'max_count_refresh_captcha'=>3,
+		'use_allow_list_ip'=>1
 	),	
 	'controllers' => array(
         'invokables' => array(
