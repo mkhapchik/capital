@@ -15,6 +15,9 @@ class AuthenticationController extends AbstractActionController
 	
 	public function loginAction()
 	{
+		$config = $this->getServiceLocator()->get('config');
+		$authConfig = $config['auth'];
+		
 		$codeAccess = $this->params()->fromRoute('codeAccess', AuthorizationController::CODE_ACCESS_NULL);
 		$is_success = $this->params()->fromRoute('is_success', 1);
 		$is_ajax = $this->params()->fromRoute('is_ajax', 0);		
@@ -53,8 +56,7 @@ class AuthenticationController extends AbstractActionController
 					$userTable = $this->getServiceLocator()->get('UserTable');
 					$sessionTable = $this->getServiceLocator()->get('SessionTable');
 					
-					$config = $this->getServiceLocator()->get('config');
-					$authConfig = $config['auth'];
+					
 					
 					if($result->isValid())
 					{
@@ -146,9 +148,10 @@ class AuthenticationController extends AbstractActionController
 				exit();
 			}
 		}
-				
+		
+		$frequency = $authConfig['frequency_of_check_timeout_sec'];
 		$this->layout()->setVariable('title', 'Аутентификация');
-		$view = new ViewModel(array('form' => $form, 'is_success'=>$is_success, 'message'=>$message, 'is_xmlhttprequest' => $is_xmlhttprequest, 'codeAccess'=>$codeAccess, 'is_ajax'=>$is_ajax));
+		$view = new ViewModel(array('form' => $form, 'is_success'=>$is_success, 'message'=>$message, 'is_xmlhttprequest' => $is_xmlhttprequest, 'codeAccess'=>$codeAccess, 'is_ajax'=>$is_ajax, 'frequency'=>$frequency));
 		return $view;
 	}
 	

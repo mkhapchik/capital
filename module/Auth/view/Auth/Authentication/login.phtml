@@ -106,6 +106,7 @@
 					if(res.is_success)
 					{
 						$('.ui-dialog-content').dialog( "destroy" );
+						timerId = setInterval(function(){checkTimeout()}, <?=$frequency?>*1000);
 					}
 					else
 					{
