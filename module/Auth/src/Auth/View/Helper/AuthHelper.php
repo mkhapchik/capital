@@ -38,7 +38,7 @@ class AuthHelper extends AbstractHelper implements ServiceLocatorAwareInterface
 			'url' => $this->pm->get('url')->__invoke('auth/timeout')
 		));
  
-		$view->setTemplate('auth/AuthHelper/timeoutScript');
+		$view->setTemplate('auth/authHelper/timeoutScript');
 
         $partialHelper = $this->view->plugin('partial');
 		
@@ -59,14 +59,14 @@ class AuthHelper extends AbstractHelper implements ServiceLocatorAwareInterface
 			$view->setVariable('logout_url', $logout_url);
 			$view->setVariable('user', $user);
 						
-			$view->setTemplate('auth/AuthHelper/user');
+			$view->setTemplate('auth/authHelper/user');
 		}
 		else
 		{
 			$login_url = $this->pm->get('url')->__invoke('auth/login');
 			$view->setVariable('login_url', $login_url);
 			
-			$view->setTemplate('auth/AuthHelper/guest');
+			$view->setTemplate('auth/authHelper/guest');
 		}
 
 		$partialHelper = $this->view->plugin('partial');

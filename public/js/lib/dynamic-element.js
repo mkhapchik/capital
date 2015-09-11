@@ -58,7 +58,7 @@
 					new_el.html(html);
 					
 					var last = $(this).find(options.target_block).last();
-					if(typeof(last) === 'object')
+					if(typeof(last) === 'object' && last.length>0)
 					{
 						last.after(new_el);
 					}
