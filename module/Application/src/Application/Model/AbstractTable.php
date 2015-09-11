@@ -33,6 +33,11 @@ abstract class AbstractTable extends AbstractTableGateway implements AdapterAwar
 		
 		$this->setObjectPrototype();
     }
+	
+	public function query($query, $mode = Adapter::QUERY_MODE_EXECUTE)
+	{
+		return $this->adapter->query($query, $mode);
+	}
   
 	/**
 	* Fetch all records from the table
@@ -121,6 +126,45 @@ abstract class AbstractTable extends AbstractTableGateway implements AdapterAwar
 		
 		return $resultSet->toArray();
 	}
+	
+	/**
+	*  quote value
+	*  @param $val
+	*  @return quote val
+	*/
+	public function quoteValue($val)
+	{
+		return $this->adapter->platform->quoteValue($val);
+	}
+	
+	/**
+	* Call procedure
+	* @param $name - procedure's name
+	* @param $params - procedure's params
+	* @return array
+	*/
+	public function callProcedure($name, $params=false)
+	{
+		if(is_array($params) && count($params)>0)
+		{
+			
+			foreach($params as &$param)
+			{
+				if($param==null) $param = 'null';
+				else $param = $this->quoteValue($param);
+			}
+			
+		}
+		else
+		{
+			$params = array();
+		}
+
+		$query = "CALL $name(".implode(',', $params).")";
+		
+		return  $this->query($query);
+	}
+	
 	
 	public function beginTransaction()
 	{

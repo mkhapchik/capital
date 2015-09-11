@@ -10,15 +10,13 @@ class Report extends AbstractTable
 	
 	public function getReportExpense($date_start=false, $date_end=false)
     {
-		if($date_start===false) $date_start='null';
-		else $date_start = "'$date_start'";
+		if($date_start===false) $date_start=null;
+		else $date_start = $date_start;
 		
-		if($date_end===false) $date_end='null';
-		else $date_end = "'$date_end'";
-		
-		$query = "CALL report_expense($date_start, $date_end)";
-		$r = $this->adapter->query($query, Adapter::QUERY_MODE_EXECUTE);
-		
+		if($date_end===false) $date_end=null;
+		else $date_end = $date_end;
+
+		$r = $this->callProcedure('report_expense', array($date_start, $date_end));
 		$result = $r->toArray();
 			
 		return $result;
