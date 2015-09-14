@@ -6,10 +6,17 @@ use Zend\View\Model\ViewModel;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
+//use Zend\EventManager\EventManagerInterface;
+
+use Zend\Mvc\MvcEvent;
+
+
 class AuthHelper extends AbstractHelper implements ServiceLocatorAwareInterface
 {
-	private $sm;
-	private $pm;
+	protected $sm;
+	protected $pm;
+	protected $events;
+    
 	
 	public function setServiceLocator(ServiceLocatorInterface $serviceLocator)
 	{
@@ -22,28 +29,42 @@ class AuthHelper extends AbstractHelper implements ServiceLocatorAwareInterface
 		return $this->sm;
 	}
 	
+	public function setEvent(MvcEvent $events)
+    {
+		$this->events = $events;
+    }
+	
+	public function getEvent()
+	{
+		return $this->events;
+	}
 	
 	public function __invoke()
 	{
 		return $this;
 	}
 	
-	
 	public function timeoutScript()
 	{
 		$config = $this->sm->get('config');
 		
-		$view = new ViewModel(array(
-			'frequency' => $config['auth']['frequency_of_check_timeout_sec'],
-			'url' => $this->pm->get('url')->__invoke('auth/timeout')
-		));
- 
-		$view->setTemplate('auth/authHelper/timeoutScript');
+		$routeMatch = $this->getEvent()->getRouteMatch();
+		$routeMatchParams = $routeMatch->getParams();
+		
+		if(!isset($routeMatchParams['__CONTROLLER__']) || $routeMatchParams['__CONTROLLER__']!='Authentication')
+		{	
+			$view = new ViewModel(array(
+				'frequency' => $config['auth']['frequency_of_check_timeout_sec'],
+				'url' => $this->pm->get('url')->__invoke('auth/timeout')
+			));
+	 
+			$view->setTemplate('auth/authHelper/timeoutScript');
 
-        $partialHelper = $this->view->plugin('partial');
-		
-        return $partialHelper($view);
-		
+			$partialHelper = $this->view->plugin('partial');
+			
+			return $partialHelper($view);
+		}
+			
 	}
 	
 	public function user()

@@ -1,7 +1,7 @@
 <?php
 return array(
 	'auth'=>array(
-		'max_counter_failures'=>3,
+		'max_counter_failures'=>false,
 		'success_redirect'=>array(
 			'route_name' => 'home',
 			'route_params'=>array()
@@ -23,7 +23,7 @@ return array(
     ),
 	'view_helpers' => array(
         'invokables' => array(
-            'AuthHelper' => 'Auth\View\Helper\AuthHelper',
+           // 'AuthHelper' => 'Auth\View\Helper\AuthHelper',
         )
     ),
 	'router' => array(

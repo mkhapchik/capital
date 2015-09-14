@@ -14,7 +14,8 @@ use Zend\View\Model\ViewModel;
 
 class Module
 {
-    private $acl;
+    private $event;
+	private $acl;
 	
 	public function getConfig()
     {
@@ -37,6 +38,7 @@ class Module
 	*/
 	public function onBootstrap(MvcEvent $e)
     {
+		$this->event = $e;
 		//$this->initAcl($e);
 		
 		$eventManager        = $e->getApplication()->getEventManager();
@@ -92,7 +94,7 @@ class Module
 			'factories' => array(
 				'AuthenticationService' => function ($sm){
 					$dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
-					$dbTableAuthAdapter = new DbTableAuthAdapter($dbAdapter, 'users', 'login', 'pwd', 'MD5(?)');
+					$dbTableAuthAdapter = new DbTableAuthAdapter($dbAdapter, 'admin_users', 'login', 'pwd', 'MD5(?)');
 					$authService = new AuthenticationService(null, $dbTableAuthAdapter);
 					return $authService;
 				},
@@ -112,6 +114,21 @@ class Module
 					return new AuthenticationController();
 				}
 			),
+		);
+	}
+	
+	public function getViewHelperConfig()
+	{
+		return array(
+			'factories' => array(
+				'AuthHelper' => function($sm) {
+						$vh = new \Auth\View\Helper\AuthHelper();
+						$vh->setEvent($this->event);
+
+						return $vh;
+
+				}
+			)
 		);
 	}
 	
