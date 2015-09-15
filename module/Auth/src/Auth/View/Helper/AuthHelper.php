@@ -34,9 +34,10 @@ class AuthHelper extends AbstractHelper implements ServiceLocatorAwareInterface
 		$config = $this->sm->get('config');
 		
 		$routeMatch = $this->sm->get('Application')->getMvcEvent()->getRouteMatch();
-		$routeMatchParams = $routeMatch->getParams();
 		
-		if(!isset($routeMatchParams['__CONTROLLER__']) || $routeMatchParams['__CONTROLLER__']!='Authentication')
+		if($routeMatch) $routeMatchParams = $routeMatch->getParams();
+		
+		if(!$routeMatch || !isset($routeMatchParams['__CONTROLLER__']) || $routeMatchParams['__CONTROLLER__']!='Authentication')
 		{	
 			$view = new ViewModel(array(
 				'frequency' => $config['auth']['frequency_of_check_timeout_sec'],

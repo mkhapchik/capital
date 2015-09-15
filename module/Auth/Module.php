@@ -15,7 +15,7 @@ use Zend\View\Model\ViewModel;
 
 class Module
 {
-	private $acl;
+	//private $acl;
 	
 	public function getConfig()
     {
@@ -45,12 +45,6 @@ class Module
         $moduleRouteListener->attach($eventManager);
 
 		$eventManager->attach(MvcEvent::EVENT_ROUTE, array($this, 'checkAccess'));
-		
-       // session_start();
-        
-       // print_r(count($_SESSION['__ZF']));
-        
-		
     }
 	
 	
@@ -60,10 +54,15 @@ class Module
 		$serviceManager = $e->getApplication()->getServiceManager();
 		$routeMatch = $e->getRouteMatch();
 		$routName = $routeMatch->getMatchedRouteName();
-		
+
 		$authorizationController = $serviceManager->get('AuthorizationController');
-				
-		if(!in_array($routName, array('auth/login', 'auth/logout', 'auth/timeout', 'auth/refresh_captcha')))
+		
+		$config = $serviceManager->get('config');
+		$system_ignore_routes = array('auth/login', 'auth/logout', 'auth/timeout', 'auth/refresh_captcha');
+		$ignore_routes = is_array($config['auth']['ignore_routes']) ? $config['auth']['ignore_routes'] : array();
+		$ignore_routes = array_merge_recursive($system_ignore_routes, $ignore_routes);
+
+		if(!in_array($routName, $ignore_routes))
 		{
 			$codeAccess = $authorizationController->checkAccess();
 			$authorizationController = $serviceManager->get('AuthorizationController');
