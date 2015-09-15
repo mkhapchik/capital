@@ -6,11 +6,6 @@ use Zend\View\Model\ViewModel;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
-//use Zend\EventManager\EventManagerInterface;
-
-use Zend\Mvc\MvcEvent;
-
-
 class AuthHelper extends AbstractHelper implements ServiceLocatorAwareInterface
 {
 	protected $sm;
@@ -29,16 +24,6 @@ class AuthHelper extends AbstractHelper implements ServiceLocatorAwareInterface
 		return $this->sm;
 	}
 	
-	public function setEvent(MvcEvent $events)
-    {
-		$this->events = $events;
-    }
-	
-	public function getEvent()
-	{
-		return $this->events;
-	}
-	
 	public function __invoke()
 	{
 		return $this;
@@ -48,7 +33,7 @@ class AuthHelper extends AbstractHelper implements ServiceLocatorAwareInterface
 	{
 		$config = $this->sm->get('config');
 		
-		$routeMatch = $this->getEvent()->getRouteMatch();
+		$routeMatch = $this->sm->get('Application')->getMvcEvent()->getRouteMatch();
 		$routeMatchParams = $routeMatch->getParams();
 		
 		if(!isset($routeMatchParams['__CONTROLLER__']) || $routeMatchParams['__CONTROLLER__']!='Authentication')

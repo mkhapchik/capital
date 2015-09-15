@@ -11,10 +11,10 @@ use Auth\Model\IpAllowedListTable;
 use Auth\Controller\AuthorizationController;
 use Auth\Controller\AuthenticationController;
 use Zend\View\Model\ViewModel;
+//use Zend\ModuleManager as ModuleManager;
 
 class Module
 {
-    private $event;
 	private $acl;
 	
 	public function getConfig()
@@ -37,8 +37,7 @@ class Module
 	* Обработчик события "начальная загрузка"
 	*/
 	public function onBootstrap(MvcEvent $e)
-    {
-		$this->event = $e;
+    {		
 		//$this->initAcl($e);
 		
 		$eventManager        = $e->getApplication()->getEventManager();
@@ -85,7 +84,7 @@ class Module
 	
 	public function initAcl(MvcEvent $e)
 	{
-		echo __CLASS__;
+		
 	}
 	
 	public function getServiceConfig()
@@ -94,15 +93,15 @@ class Module
 			'factories' => array(
 				'AuthenticationService' => function ($sm){
 					$dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
-					$dbTableAuthAdapter = new DbTableAuthAdapter($dbAdapter, 'users', 'login', 'pwd', 'MD5(?)');
+					$dbTableAuthAdapter = new DbTableAuthAdapter($dbAdapter, 'admin_users', 'login', 'pwd', 'MD5(?)');
 					$authService = new AuthenticationService(null, $dbTableAuthAdapter);
 					return $authService;
 				},
 				'UserTable' => function ($sm) {
-					return new UserTable('users');
+					return new UserTable('admin_users');
 				},
 				'SessionTable' => function ($sm) {
-					return new SessionTable('session');
+					return new SessionTable('admin_session');
 				},
 				'IpAllowedListTable' => function($sm){
 					return new IpAllowedListTable('ip_allowed_list');
@@ -121,12 +120,9 @@ class Module
 	{
 		return array(
 			'factories' => array(
-				'AuthHelper' => function($sm) {
+				'AuthHelper' => function($sm){
 						$vh = new \Auth\View\Helper\AuthHelper();
-						$vh->setEvent($this->event);
-
 						return $vh;
-
 				}
 			)
 		);
