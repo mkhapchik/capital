@@ -7,7 +7,12 @@ use Auth\Model\User;
 
 class UserTable extends AbstractTable
 {
-	protected $table = 'users';
+	protected $table;
+	
+	public function __construct($table)
+	{
+		$this->table = $table;
+	}
 	
 	protected function setObjectPrototype()
 	{

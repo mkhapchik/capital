@@ -94,18 +94,18 @@ class Module
 			'factories' => array(
 				'AuthenticationService' => function ($sm){
 					$dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
-					$dbTableAuthAdapter = new DbTableAuthAdapter($dbAdapter, 'admin_users', 'login', 'pwd', 'MD5(?)');
+					$dbTableAuthAdapter = new DbTableAuthAdapter($dbAdapter, 'users', 'login', 'pwd', 'MD5(?)');
 					$authService = new AuthenticationService(null, $dbTableAuthAdapter);
 					return $authService;
 				},
 				'UserTable' => function ($sm) {
-					return new UserTable();
+					return new UserTable('users');
 				},
 				'SessionTable' => function ($sm) {
-					return new SessionTable();
+					return new SessionTable('session');
 				},
 				'IpAllowedListTable' => function($sm){
-					return new IpAllowedListTable();
+					return new IpAllowedListTable('ip_allowed_list');
 				},
 				'AuthorizationController'=>function($sm){
 					return new AuthorizationController();

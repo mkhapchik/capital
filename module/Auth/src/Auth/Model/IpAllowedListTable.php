@@ -6,8 +6,13 @@ use Zend\Db\Sql\Select;
 
 class IpAllowedListTable extends AbstractTable
 {
-	protected $table = 'ip_allowed_list';
-
+	protected $table;
+	
+	public function __construct($table)
+	{
+		$this->table = $table;
+	}
+	
 	public function is_allowed($ip)
 	{
 		$select = new Select($this->table);

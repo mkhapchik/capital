@@ -11,7 +11,12 @@ class SessionTable extends AbstractTable
 	const METHOD_CLOSE_MANUALLY = 'manually';
 	const METHOD_CLOSE_TIMEOUT = 'timeout';
 	
-	protected $table = 'session';
+	protected $table;
+	
+	public function __construct($table)
+	{
+		$this->table = $table;
+	}
  
 	protected function setObjectPrototype()
 	{
