@@ -38,7 +38,7 @@ class Module
 		return array(
             'factories' => array(
                 'menu' => function($sm){
-                    $menutable = new \Application\Model\MenuTable();
+                    $menutable = new \Application\Model\MenuTable('menu');
                     return $menutable;
                 },
  				'Navigation' => function ($sm) {
