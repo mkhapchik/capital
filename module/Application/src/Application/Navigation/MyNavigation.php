@@ -8,11 +8,11 @@ class MyNavigation extends DefaultNavigationFactory
 {
     protected function getPages(ServiceLocatorInterface $serviceLocator)
     {
-		
+		if(!$serviceLocator->get('AuthenticationService')->hasIdentity()) return false;
 		if (null === $this->pages) 
 		{
             //FETCH data from table menu :
-            $fetchMenu = $serviceLocator->get('menu')->fetchAll();
+            $fetchMenu = $serviceLocator->get('menu')->fetchAllItem();
 			
             $configuration['navigation'][$this->getName()] = array();
             foreach($fetchMenu as $key=>$row)
