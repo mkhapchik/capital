@@ -44,6 +44,10 @@ class Module
  				'Navigation' => function ($sm) {
 					$navigation =  new \Application\Navigation\MyNavigation();
 					return $navigation->createService($sm);
+				},
+				'SendMailService'=>function($sm){
+					$sms =  new \Application\Service\SendMailService();
+					return $sms;
 				}
 			)
 		);
