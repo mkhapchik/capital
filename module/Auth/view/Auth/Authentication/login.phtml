@@ -43,7 +43,10 @@
 			<?=$this->formRow($el);?>
 			<?php if($el->getName()=='captcha'):?><a class="refresh_captcha" href="#">Обновить картинку</a><?php endif; ?>
 		</div>
-	<?php endforeach; ?>
+	<?php 
+	endforeach; 
+	echo $this->form()->closeTag();
+	?>
 	<div class="clear"></div>
 	</div>
 </section>

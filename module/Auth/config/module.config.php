@@ -14,10 +14,7 @@ return array(
 		'frequency_of_check_timeout_sec'=>5,
 		'max_count_refresh_captcha'=>3,
 		'use_allow_list_ip'=>1,
-		'ignore_routes'=>array(
-			
-			'tasks'
-		)
+		'ignore_routes'=>array()
 	),	
 	'controllers' => array(
         'invokables' => array(

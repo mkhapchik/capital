@@ -71,7 +71,7 @@ abstract class AbstractTransactionController extends AbstractActionController
 				$is_success=0;
 			}
 		}
-		var_dump($form->getMessages());
+		
 		if($is_success) $message = 'Данные успешно добавлены';
 		return array('form' => $form, 'is_success'=>$is_success, 'message'=>$message);
 	}
