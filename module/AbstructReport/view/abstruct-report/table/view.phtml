@@ -1,0 +1,55 @@
+
+<?php if(isset($filterForm)):?>
+<div class="b-form b-form-inline filter">
+	<?php
+	$filterForm = $this->filterForm;
+	$filterForm->prepare();
+	echo $this->form()->openTag($filterForm);
+	foreach($filterForm as $el):
+	?>
+		<div class="form_element <?=$el->getName()?>" id="<?=$el->getName()?>">
+			<?=$this->formRow($el);?>
+		</div>
+	<?php
+	endforeach; 
+	echo $this->form()->closeTag();
+	?>
+</div>
+<?php endif;?>
+<?php if(count($this->paginator)>0): ?>
+<table class="report">
+		<tr>
+			<?php foreach($caption as $val) : ?>
+			<th><?=$val?></th>
+			<?php endforeach; ?>
+		</tr>
+		<?php foreach ($this->paginator as $row) : ?>
+		<tr>
+			<?php foreach($caption as $k=>$v): if(array_key_exists($k, $caption)): ?>
+			<td class='<?=$k?>'>
+			<?php 
+			if(isset($formatting) && array_key_exists($k, $formatting)) echo $formatting[$k]($row[$k], $row);
+			else echo $row[$k];
+			?>
+			</td>
+			<?php endif; endforeach; ?>
+			
+		</tr>
+		<?php endforeach; ?>
+</table>
+
+<?php
+echo $this->paginationControl($this->paginator, 'sliding', 'application/pagination/paginator.phtml', array(
+		'route' => $this->routName,
+		'params' => $this->routeParams,
+		'options'=> $this->routeOptions,
+	)
+);
+?>
+
+<?php else: ?>
+<div class="no_data">
+	Результатов не найдено!
+</div>
+
+<?php endif; ?>
