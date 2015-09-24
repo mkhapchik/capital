@@ -1,0 +1,77 @@
+<style>
+	.item{
+		width:100px;
+		height:120px;
+		float:left;
+		margin: 10px;
+	}
+	
+	.selected{
+		box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+	}
+	
+	.item a.link{
+		display:block;
+		padding:10px;
+		height:70px;
+		
+	}
+	
+	.item .select{
+		display:block;
+		height:10px;
+		padding: 5px;
+		border-top: 1px dashed #333;
+	}
+	
+	.dir{
+		background:#f00;
+	}
+	
+	.img{
+		background:#00f;
+	}
+	
+	.item span.name{
+		display:block;
+		padding: 0 5px;
+		width:70px;
+		overflow:hidden;
+	}
+	
+	.bread_crumbs{
+		padding: 5px;
+		margin: 5px 10px;
+		background: #dedede;
+	}
+	
+	.nav{
+		padding: 5px;
+		margin: 5px 10px;
+		background: #dedede;
+	}
+	
+	.nav button{
+		margin-left: 10px;
+		cursor:pointer;
+	}
+	
+	.nav button:first-child{
+		margin-left:0;
+	}
+	
+	.message{
+		margin: 5px 10px;
+		padding: 5px;
+		background: #f00;
+	}
+	
+</style>
+
+<section id="fileManager"></section>
+
+<script>
+	$(document).ready(function(){
+		$('#fileManager').filemanager();
+	});
+</script>

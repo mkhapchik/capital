@@ -13,7 +13,8 @@ return array(
         'Account',
         'Categories',
         'Transactions',
-		'Reports'
+		'Reports',
+		'Filemanager'
         ),
     'module_listener_options' => array(
         'module_paths' => array(
