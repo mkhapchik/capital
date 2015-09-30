@@ -86,10 +86,45 @@ class FilemanagerController extends AbstractActionController
 		exit();
 	}
 	
+	public function renameAction()
+	{
+		$old_path = $this->getRealLink($this->getFromPost('old_path', false));
+		$new_path = $this->getFromPost('new_path', false);
+		$new_path_info = pathinfo($new_path);
+		
+		if($this->is_allowed(dirname($old_path)) && $this->is_allowed($this->getRealLink(dirname($new_path))))
+		{
+			$model = $this->getModel();
+			$model->rename($old_path, $new_path);
+		}
+		else
+		{
+			echo "Доступ запрещен!";
+		}
+		
+		exit();
+	}
+	
+	public function mkdirAction()
+	{
+		$path = $this->getRealLink($this->getFromPost('path', false));
+		
+		if($this->is_allowed($path))
+		{
+			$model = $this->getModel();
+			$model->mkdir($path);
+		}
+		else
+		{
+			echo "Доступ запрещен!";
+		}
+		exit();
+	}
+	
 	protected function is_allowed($dir)
 	{
 		$model = $this->getModel();
-		return $model->is_allowed($dir, array('files', 'files/dir1/ddd', 'files/dir1'));
+		return $model->is_allowed($dir, array('files', 'files/dir1/ddd', 'files/dir1', 'files/dir1x'));
 	}
 	
 	protected function getModel()
@@ -101,10 +136,14 @@ class FilemanagerController extends AbstractActionController
 	
 	protected function getLinkFromPost($def_val='')
 	{
-		$model = $this->getModel();
 		$path = $this->getFromPost('path', $def_val);
+		return $this->getRealLink($path);
+	}
+	
+	protected function getRealLink($path)
+	{
+		$model = $this->getModel();
 		$link = $model->reallink($path);
-		
 		return $link;
 	}
 	

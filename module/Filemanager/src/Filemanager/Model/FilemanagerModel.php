@@ -3,6 +3,8 @@ namespace Filemanager\Model;
 
 class FilemanagerModel
 {
+	const NewDirName = 'new_directory';
+	
 	private $homeDir;
 	private $documentRoot;
 	private $homeLink;
@@ -43,9 +45,7 @@ class FilemanagerModel
 			$list[$path]['class'] = $is_dir ? 'dir' : 'file';
 			if($is_img) $list[$path]['class'] .= " img";
 			if($file_ext) $list[$path]['class'] .= " $file_ext";
-			
-			
-			
+
 		}
 			
 		return $list;
@@ -58,17 +58,89 @@ class FilemanagerModel
 	
 	public function upload($from, $to, $name)
 	{
-		$to = $this->getFilePath($to);
-		if(is_dir($to))
+		$to_dir = $this->getFilePath($to);
+		if(is_dir($to_dir))
 		{
-			move_uploaded_file($from, $to . '/' . basename($name ));
+			$path = $this->getUniqPath($to_dir . '/' . basename($name));
+			
+			move_uploaded_file($from, $path);
 		}
+	}
+	
+	protected function getUniqPath($path)
+	{
+		$path_info = pathinfo($path);		
+  
+		$i=0;
+		while(file_exists($path) || is_dir($path))
+		{
+			$i++;
+			$path = $path_info['dirname'] . '/' . $path_info['filename'] . '_'.$i;
+			if(isset($path_info['extension'])) $path .= '.'.$path_info['extension'];
+		}
+		
+		return $path;
 	}
 	
 	public function delete($link)
 	{
 		$path = $this->getFilePath($link);
-		if(file_exists($path)) unlink($path);
+		$result = false;
+		if(is_dir($path)) $result = $this->removeDirectory($path);
+		else if(file_exists($path)) $result = @unlink($path);
+		
+		return $result;
+	}
+	
+	protected function removeDirectory($dir) 
+	{
+		if ($objs = glob($dir."/*")) 
+		{
+			foreach($objs as $obj) is_dir($obj) ? $this->removeDirectory($obj) : @unlink($obj); 
+		}
+		
+		return @rmdir($dir);
+	}
+
+	
+	public function rename($old_path, $new_path)
+	{
+		$new_path_info = pathinfo($new_path);
+		$old_path_info = pathinfo($old_path);
+		
+		$old_path_info['extension'] = isset($old_path_info['extension']) ? $old_path_info['extension'] : '';
+		
+		if(!isset($new_path_info['extension']) || $new_path_info['extension'] != $old_path_info['extension'])
+		{
+			$new_path_info['extension'] = $old_path_info['extension'];
+		}
+		
+		$old = $this->getFilePath($old_path);
+		$new = $this->getFilePath($new_path_info['dirname']) . '/' . $new_path_info['filename'];
+		if(!empty($old_path_info['extension'])) $new.= '.'.$old_path_info['extension'];
+		
+		$new = $this->getUniqPath($new);
+		
+		if(!file_exists($new))
+		{
+			return @rename($old, $new);
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	public function mkdir($path)
+	{
+		$path = $this->getFilePath($path);
+		$dir = $this->getUniqPath($path . '/' . self::NewDirName);
+		return @mkdir($dir);
+	}
+	
+	public function remove($old_path, $new_path)
+	{
+		return $this->rename($old_path, $new_path);
 	}
 	
 	public function reallink($link)
@@ -83,7 +155,6 @@ class FilemanagerModel
 	public function getFilePath($link)
 	{ 
 		if(empty($link)) $link = $this->homeLink;
-		
 		$filepath = $this->trim(realpath($this->documentRoot . '/' . $link));
 		return $filepath;
 	}
@@ -101,6 +172,8 @@ class FilemanagerModel
 
 		return $allowed;
 	}
+	
+	
 	
 	protected function trim($val)
 	{

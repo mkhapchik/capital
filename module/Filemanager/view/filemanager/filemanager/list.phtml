@@ -17,12 +17,12 @@
 <div class="items">
 <?php foreach($list as $path=>$fileinfo): ?>
 <div class="item <?=$fileinfo['class']?>">
-	<a class='link' title="<?=$fileinfo['basename']?> " href="<?=$path?>">
+	<div class='link' title="<?=$fileinfo['basename']?>">
 		<?php if($fileinfo['is_img']):?>
-		<img width="80" height="50" src="<?=$path?>" />
+		<img width="80" height="50" src="/<?=$path?>" />
 		<?php endif; ?>
 		<span class="name"><?=$fileinfo['basename']?></span>
-	</a>
+	</div>
 	<label class='select'>
 		<input type='checkbox' value='<?=$path?>'>
 	</label>

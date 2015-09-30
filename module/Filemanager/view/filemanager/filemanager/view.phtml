@@ -1,66 +1,81 @@
 <style>
-	.item{
+	.filemanager .item{
 		width:100px;
 		height:120px;
 		float:left;
 		margin: 10px;
 	}
 	
-	.selected{
+	.filemanager .selected{
 		box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
 	}
 	
-	.item a.link{
+	.filemanager .item div.link{
 		display:block;
 		padding:10px;
 		height:70px;
-		
+		cursor:pointer;
 	}
 	
-	.item .select{
+	.filemanager .item .select{
 		display:block;
 		height:10px;
 		padding: 5px;
 		border-top: 1px dashed #333;
 	}
 	
-	.dir{
+	.filemanager .dir{
 		background:#f00;
 	}
 	
-	.img{
+	.filemanager .img{
 		background:#00f;
 	}
 	
-	.item span.name{
+	.filemanager .item span.name{
 		display:block;
 		padding: 0 5px;
 		width:70px;
 		overflow:hidden;
+		color:#fff;
+		font: 10px/12px Arial;
 	}
 	
-	.bread_crumbs{
+	.filemanager .bread_crumbs{
 		padding: 5px;
 		margin: 5px 10px;
 		background: #dedede;
 	}
 	
-	.nav{
+	.filemanager .nav{
 		padding: 5px;
 		margin: 5px 10px;
 		background: #dedede;
 	}
 	
-	.nav button{
+	.filemanager .nav button{
 		margin-left: 10px;
 		cursor:pointer;
 	}
 	
-	.nav button:first-child{
+	.filemanager .nav button:first-child{
 		margin-left:0;
 	}
 	
-	.message{
+	.filemanager .nav .mkdir{
+		margin-left:25px;
+	}
+
+	.filemanager .nav .upload{
+		
+		margin-right:15px;
+	}
+	
+	.filemanager .nav .rename{
+		margin-left:25px;
+	}
+	
+	.filemanager .message{
 		margin: 5px 10px;
 		padding: 5px;
 		background: #f00;
@@ -73,5 +88,24 @@
 <script>
 	$(document).ready(function(){
 		$('#fileManager').filemanager();
+		/*
+		var div = $('<div/>', {id:'FM'});
+		div.filemanager({
+			choosen  : 0,
+			choosen_callback: function(path, item){
+				if(item.hasClass('img')) 
+				{
+					$(this).dialog('close');
+					$('#fileManager').append($('<img/>', {src: '/'+path}));
+				}
+			}
+			
+		});
+		div.dialog({
+			width: '800px',
+			height: 'auto',
+			maxHeight: window.height*0.9+'px',
+		});
+		*/
 	});
 </script>
