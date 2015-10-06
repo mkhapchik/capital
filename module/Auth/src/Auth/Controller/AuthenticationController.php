@@ -28,7 +28,7 @@ class AuthenticationController extends AbstractActionController
 		$form = new LoginForm('loginForm');
 		
         $request = $this->getRequest();
-		$is_xmlhttprequest = $request->isXmlHttpRequest();
+		$is_xmlhttprequest = (bool)@$request->isXmlHttpRequest();
 		
 		
 		if ($request->isPost() && $request->getPost('submit', false)!==false) 
