@@ -14,7 +14,8 @@ return array(
         'Categories',
         'Transactions',
 		'Reports',
-		'Filemanager'
+		'Filemanager',
+		'Pages',
         ),
     'module_listener_options' => array(
         'module_paths' => array(
