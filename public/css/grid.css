@@ -87,6 +87,36 @@ body{
 	cursor:default;
 }
 
+.top_panel .menu-btn{
+	width: 100px;
+	padding: 0 10px;
+	margin-bottom: 30px;
+	/*background: #333;
+	color: #FFF;
+	*/
+	color:#333;
+	text-align: center;
+	cursor: pointer;
+	float:left;
+	height: 40px;
+	margin-top:5px;
+	font: normal 18px/40px Arial; 
+	margin-left:2%;
+	cursor:pointer;
+	color:#333;
+}
+
+.top_panel .menu-btn span.icon{
+	font-size: 18px;
+	font-weight:bold;
+	margin-right:4px;
+}	
+
+.top_panel .menu-btn:hover{
+	background: #00b4ff;
+	color: #FFF;
+}
+
 .main{
 	width:80%;
 	padding: 3% 10%;

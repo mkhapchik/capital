@@ -10,26 +10,24 @@
 		<script src="<?=$this->basePath()?>/js/lib/dynamic-element.js"></script>
 		<script src="<?=$this->basePath()?>/js/lib/filemanager.js"></script>
 		<script src="<?=$this->basePath()?>/js/init.js"></script>
+		
+		
 	</head>
 	<body>
-		<div class="site-overlay"></div>
+	<div class="site-overlay"></div>
 		<nav class="pushy pushy-left">
-			<?php echo $this->MenuHelper(false); ?>
+			<?php 
+				//echo $this->MenuHelper(false, 'pages/navigation/menu');
+			?>
 		</nav>
 		<section id="wrapper">
 			<section class="top_panel">	
 				<div class="menu-btn"><span class="icon">&#9776;</span> Меню</div>
 				<?php echo $this->AuthHelper()->user(); ?>
-				<nav>
-					
-					<?php 
-						
-						//echo $this->navigation('Navigation')->menu()->setPartial('application/navigation/menu')->render();
-						//echo $this->navigation('page_navigation')->test();
-					?>
-				</nav>
+				<nav> <?php  echo $this->MenuHelper('capital', 'pages/navigation/menu');?> </nav>
 			</section>
 			<section class="main">
+				
 				<section class="view">
 					<?= $this->content; ?>
 				</section>
