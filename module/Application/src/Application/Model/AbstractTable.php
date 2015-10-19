@@ -5,16 +5,19 @@ use Zend\Db\Adapter\Adapter;
 use Zend\Db\ResultSet\HydratingResultSet;
 use Zend\Db\TableGateway\AbstractTableGateway;
 use Zend\Db\Adapter\AdapterAwareInterface;
+use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use Zend\ServiceManager\ServiceLocatorInterface;
 use Categories\Model\Category;
 use Zend\Db\Sql\Select;
 use ArrayObject;
 
-abstract class AbstractTable extends AbstractTableGateway implements AdapterAwareInterface
+abstract class AbstractTable extends AbstractTableGateway implements AdapterAwareInterface, ServiceLocatorAwareInterface
 {
 	protected $table;
 	protected $adapter;
 	protected $connection;
 	protected $objectPrototype;
+	protected $sm;
 	
 	protected function setObjectPrototype()
 	{
@@ -34,6 +37,16 @@ abstract class AbstractTable extends AbstractTableGateway implements AdapterAwar
 		$this->setObjectPrototype();
     }
 	
+	public function setServiceLocator(ServiceLocatorInterface $serviceLocator)
+	{
+		$this->sm = $serviceLocator;
+	}
+
+    public function getServiceLocator()
+	{
+		return $this->sm;
+	}
+	
 	public function query($query, $mode = Adapter::QUERY_MODE_EXECUTE)
 	{
 		return $this->adapter->query($query, $mode);
@@ -42,18 +55,21 @@ abstract class AbstractTable extends AbstractTableGateway implements AdapterAwar
 	/**
 	* Fetch all records from the table
 	*/
-    public function fetchAll($where=null, $paginated=false)
+    public function fetchAll($where=null, $paginated=false, $sort=array(), $filter=null)
 	{
+		$select = new Select($this->table);
+		$select->where($where);
+		$select->where($filter);
+		$select->order($sort);
+		
 		if($paginated) 
 		{
-            $select = new Select($this->table);
-			$select->where($where);
             $paginator = $this->getPaginator($select);
 			return $paginator;
         }
 		else
 		{
-			$resultSet = $this->select($where);
+			$resultSet = $this->selectWith($select);
 			$resultSet->setObjectPrototype($this->objectPrototype);
 			return $resultSet->toArray();
 		}
@@ -72,10 +88,9 @@ abstract class AbstractTable extends AbstractTableGateway implements AdapterAwar
 	* @param $id - ID string
 	* @throw Exception
 	*/
-    public function get($id)
+    public function get($where)
 	{
-		$id  = (int) $id;
-        $rowset = $this->select(array('id' => $id));
+        $rowset = $this->select($where);
         $rowset->setObjectPrototype($this->objectPrototype);
 		$row = $rowset->current();
         if (!$row) throw new \Exception("Could not find row $id");

@@ -4,67 +4,135 @@ namespace AbstructReport\Controller;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 
-class TableController extends AbstractActionController
+Abstract class TableController extends AbstractActionController
 {
-    protected function view($params=array(), $f_filter=null, $countPerPage=false)
+    protected $routName;
+	protected $routeParams;
+	protected $routeOptions;
+	
+	protected function view()
 	{
-		if(!$countPerPage)
+		$this->routName   = $this->getEvent()->getRouteMatch()->getMatchedRouteName();
+		$this->routeParams = array();
+		$this->routeOptions = array();
+		$this->routeOptions['query'] = $this->params()->fromQuery();
+		
+		$sort = $this->clearSort($this->params()->fromQuery('sort', array()));
+		$filter = $this->clearFilter($this->params()->fromQuery('filter', null));
+				
+		$paginator = $this->getPaginator($sort, $filter);
+		$paginator->setCurrentPageNumber((int) $this->params()->fromQuery('page', 1));
+		$paginator->setItemCountPerPage((int) $this->params()->fromQuery('count', 50));
+
+		$sortLinks = $this->getSortLinks($this->routeOptions, $this->routName, $this->routeParams);
+		
+		return array(
+			'paginator' => $paginator,
+			'routName' => $this->routName,
+			'routeParams'=>$this->routeParams,
+			'routeOptions'=>$this->routeOptions,
+			'sortLinks'=>$sortLinks
+		);
+	}
+	
+	abstract protected function getPaginator($sort, $filter);
+	
+	protected function getSortList()
+	{
+		return array();
+	}
+	
+	protected function getFilterList()
+	{
+		return array();
+	}
+	
+	protected function clearSort($querySort)
+	{
+		$list = $this->getSortList();
+		if(is_array($list) && count($list)>0 && is_array($querySort))
 		{
-			$config = $this->serviceLocator->get('config');
-			$countPerPage = (int)$config['report']['table']['countPerPage'];
+			return array_filter($querySort, function($var, $key) use ($list){
+				if(in_array($key, $list) && in_array($var, array('asc', 'desc'))) return true;
+				else return array();
+			}, ARRAY_FILTER_USE_BOTH);
 		}
 		else
 		{
-			$countPerPage = (int)$countPerPage;
+			return array();
 		}
-		
-		if($f_filter) 
+	}
+	
+	protected function clearFilter($queryFilter)
+	{
+		$list = $this->getFilterList();
+		if(is_array($list) && count($list)>0 && is_array($queryFilter))
 		{
-			$filter = $this->params()->fromQuery('filter', $this->getDefaultFilter());
-			if(!is_array($filter)) $filter = array();
-			$filter = $filter+$this->getDefaultFilter();
-			
+			return array_filter($queryFilter, function($var, $key) use ($list){
+				if(in_array($key, $list))
+				{
+					if(is_array($var))
+					{
+						return null;
+					}
+					else return !empty($var);
+				}
+				else 
+				{
+					return null;
+				}
+			}, ARRAY_FILTER_USE_BOTH);
 		}
-		else $filter=null;
+		else
+		{
+			return null;
+		}
+	}
+	
+	private function getSortLinks($options, $routName, $routeParams)
+	{
+		$list = $this->getSortList();
+		if(is_array($list) && count($list)>0)
+		{
+			$sort_url = array();
+			foreach($list as $name) $sort_url[$name] = $this->getSortItem($name, $options, $routName, $routeParams);
 			
-		if(!isset($params['routName'])) $params['routName'] = $this->getEvent()->getRouteMatch()->getMatchedRouteName();
-		if(!isset($params['routeParams'])) $params['routeParams'] = array('action' => 'view');
-		if(!isset($params['routeOptions'])) $params['routeOptions'] = array();
+			return $sort_url;
+		}
+		else
+		{
+			return array();
+		}
+	}
+	
+	private function getSortItem($name, $options, $routName, $routeParams)
+	{
+		if(isset($options['query']['sort'][$name])) 
+		{
+			if($options['query']['sort'][$name]=='asc') 
+			{
+				$options['query']['sort'][$name] = 'desc';
+				$dir = 'asc';
+			}
+			else
+			{
+				unset($options['query']['sort'][$name]);
+				$dir = 'desc';
+			}
+		}
+		else 
+		{
+			$options['query']['sort'][$name] = 'asc';
+			$dir = '';
+		}
 		
-		if(is_array($filter) && count($filter)>0) foreach($filter as $k=>$v) $params['routeOptions']['query']["filter[$k]"]=$v;	
-
+		$viewHelperManager = $this->getServiceLocator()->get('ViewHelperManager');
+		$url = $viewHelperManager->get('url');
 		
-		$paginator = $this->getPaginator($filter);
-		$paginator->setCurrentPageNumber((int) $this->params()->fromQuery('page', 1));
-		$paginator->setItemCountPerPage($countPerPage);
-			
-		$filterForm = $this->getFilterForm();
-		if($filterForm) $filterForm->initForm($filter);
-				
-		$view_params = array(
-			'paginator' => $paginator,
-			'filterForm'=>$filterForm,
+		return array(
+			'url' => $url($routName, $routeParams, $options),
+			'dir' => $dir,
 		);
-		
-		$view_params = array_merge_recursive($view_params, $params);
-		
-		$view = new ViewModel($view_params);
-		
-		return $view; 
-	}
-
-	protected function getPaginator($filter)
-	{
-		die('function '  . __FUNCTION__  . 'is not exist');
 	}
 	
-	protected function getDefaultFilter()
-	{
-		return null;
-	}
-	
-	protected function getFilterForm()
-	{
-		return null;
-	}
 }

@@ -57,7 +57,7 @@ class AuthorizationController extends AbstractActionController
 						if(isset($this->session->user_id))
 						{
 							$userTable = $serviceLocator->get('UserTable');
-							$this->user = $userTable->get($this->session->user_id);
+							$this->user = $userTable->get(array('id'=>$this->session->user_id));
 							
 							$inactivityTime = $authConfig['inactivity_time_min']*60;
 							$lastActivity = strtotime($this->session->lastActivity);

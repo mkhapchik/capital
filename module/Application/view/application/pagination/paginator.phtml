@@ -10,7 +10,7 @@ if(!is_array($this->options)) $this->options=array();
 			$opt['query']['page']=$this->previous;
 			?>
                 <li>
-					 <a href="<?php echo $this->url($this->route, $this->params, array_merge_recursive(array('query'=>array('page'=>$this->previous)), $this->options)); ?>">
+					 <a href="<?php echo $this->url($this->route, $this->params, $opt); ?>">
                         <<
                     </a>
                 </li>
@@ -22,9 +22,12 @@ if(!is_array($this->options)) $this->options=array();
 
 			<!-- Numbered page links -->
             <?php foreach ($this->pagesInRange as $page): ?>
-                <?php if ($page != $this->current): ?>
+                <?php if ($page != $this->current): 
+					$opt = $this->options;
+					$opt['query']['page']=$page;
+				?>
                     <li>
-                        <a href="<?php echo $this->url($this->route, $this->params, array_merge_recursive(array('query'=>array('page'=>$page)), $this->options));?>">
+                        <a href="<?php echo $this->url($this->route, $this->params, $opt);?>">
                             <?php echo $page; ?>
                         </a>
                     </li>
@@ -36,9 +39,12 @@ if(!is_array($this->options)) $this->options=array();
             <?php endforeach; ?>
 
             <!-- Next page link -->
-            <?php if (isset($this->next)): ?>
+            <?php if (isset($this->next)): 
+				$opt = $this->options;
+				$opt['query']['page']=$this->next;
+			?>
                 <li>
-                    <a href="<?php echo $this->url($this->route, $this->params, array_merge_recursive(array('query'=>array('page'=>$this->next)), $this->options)); ?>">
+                    <a href="<?php echo $this->url($this->route, $this->params, $opt); ?>">
                         >>
                     </a>
                 </li>

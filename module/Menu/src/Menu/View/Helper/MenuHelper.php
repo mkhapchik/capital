@@ -1,5 +1,5 @@
 <?php
-namespace Pages\View\Helper;
+namespace Menu\View\Helper;
 
 use Zend\View\Helper\Navigation;
 use Zend\View\Model\ViewModel;
@@ -28,8 +28,8 @@ class MenuHelper extends Navigation implements ServiceLocatorAwareInterface
 	
 	public function __invoke($menuName=null, $partial=null)
 	{
-		$menuTable = $this->sm->get('Pages\Model\MenuTable');
-		$menu = $menuTable->getMenu($menuName);
+		$menuService = $this->sm->get('Menu\Service\Menu');
+		$menu = $menuService->getMenu($menuName);
 				
 		if($menuName===false) 
 		{

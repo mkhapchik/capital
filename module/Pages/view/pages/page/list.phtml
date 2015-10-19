@@ -1,0 +1,54 @@
+<style>
+	a.asc{
+		font-weight:bold;
+		color:#f00!important;
+	}
+	
+	a.desc{
+		font-weight:bold;
+		color:#00f!important;
+	}
+</style>
+<section id="PageList" class="block">
+	<header class="head">
+		<h1>Управление страницами</h1>
+	</header>
+	<div class="body">
+		<div class="filter">
+		
+		</div>
+		<table class="report">
+			<tr>
+				<th><a class="<?=$sortLinks['header']['dir']?>" href="<?=$sortLinks['header']['url']?>">Название</a></th>
+				<th>Управление</th>
+				<th><a class="<?=$sortLinks['date_last_modification']['dir']?>" href="<?=$sortLinks['date_last_modification']['url']?>">Дата последнего изменения</a></th>
+				<th><a class="<?=$sortLinks['date_creation']['dir']?>" href="<?=$sortLinks['date_creation']['url']?>">Дата создания</a></th>
+				<th><a class="<?=$sortLinks['author_id']['dir']?>" href="<?=$sortLinks['author_id']['url']?>">Автор</a></th>
+			</tr>
+			<?php foreach ($this->paginator as $page) : // <-- change here!  ?>
+				<tr>
+					<td><a href="#"><?= $this->escapeHtml($page['header']);?></a></td>
+					<td>
+					<?=$this->url($this->routName, array('action'=>'activeToggle', 'id'=>$page['id']));?>
+					</td>
+					<td><?= date('d.m.Y', strtotime($page['date_last_modification']));?></td>
+					<td><?= date('d.m.Y', strtotime($page['date_creation']));?></td>
+					<td><?= $this->escapeHtml($page['author_id']);?></td>
+				</tr>
+			<?php endforeach; ?>
+		</table>
+
+		<?php
+		echo $this->paginationControl(
+			$this->paginator,
+			'sliding',
+			'application/pagination/paginator.phtml',
+			array(
+				'route' => $this->routName,
+				'params' => $this->routeParams,
+				'options' => $this->routeOptions
+			)
+		 );
+		 ?>
+	</div>
+</section>

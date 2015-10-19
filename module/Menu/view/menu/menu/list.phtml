@@ -1,0 +1,48 @@
+<style>
+	a.asc{
+		font-weight:bold;
+		color:#f00!important;
+	}
+	
+	a.desc{
+		font-weight:bold;
+		color:#00f!important;
+	}
+</style>
+<section id="PageList" class="block">
+	<header class="head">
+		<h1>Управление меню</h1>
+	</header>
+	<div class="body">
+		<div class="filter">
+		
+		</div>
+		<table class="report">
+			<tr>
+				<th><a class="<?=$sortLinks['label']['dir']?>" href="<?=$sortLinks['label']['url']?>">Название</a></th>
+				<th>Управление</th>
+				<th><a class="<?=$sortLinks['is_active']['dir']?>" href="<?=$sortLinks['is_active']['url']?>">Активность</a></th>
+			</tr>
+			<?php foreach ($this->paginator as $menu) : // <-- change here!  ?>
+				<tr>
+					<td><a href="#"><?= $this->escapeHtml($menu['label']);?></a></td>
+					<td></td>
+					<td><?=$menu['is_active'] ? 'Активно' : 'Скрыто'?></td>
+				</tr>
+			<?php endforeach; ?>
+		</table>
+
+		<?php
+		echo $this->paginationControl(
+			$this->paginator,
+			'sliding',
+			'application/pagination/paginator.phtml',
+			array(
+				'route' => $this->routName,
+				'params' => $this->routeParams,
+				'options' => $this->routeOptions
+			)
+		 );
+		 ?>
+	</div>
+</section>

@@ -1,6 +1,7 @@
 <?php
-namespace Pages;
+namespace Menu;
 use Zend\Mvc\MvcEvent;
+use Zend\Mvc\ModuleRouteListener;
 
 class Module
 {
@@ -24,10 +25,26 @@ class Module
     {
 		return array(
             'factories' => array(
-				'Pages\Model\PageModel' => function($sm){
-					return new \Pages\Model\PageModel('pages');
+				'Menu\Model\MenuTable' => function($sm){
+					return new \Menu\Model\MenuTable('pages_menu');
 				},
+				'Menu\Service\Menu' => function($sm){
+					return new \Menu\Service\Menu();
+				},
+				
 			)
 		);
     }
+	
+	public function getViewHelperConfig()
+	{
+		return array(
+			'factories' => array(
+				'MenuHelper' => function($helpers){
+						$vh = new \Menu\View\Helper\MenuHelper();
+						return $vh;
+				}
+			)
+		);
+	}
 }

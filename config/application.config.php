@@ -7,7 +7,9 @@
  */
 return array(
     'modules' => array(
-        'Auth',
+		'Pages',
+		'Auth',
+		'Aliases',
 		'Application',
         'ZFTool',
         'Account',
@@ -15,7 +17,8 @@ return array(
         'Transactions',
 		'Reports',
 		'Filemanager',
-		'Pages',
+		'Menu',
+		'AbstructReport',
         ),
     'module_listener_options' => array(
         'module_paths' => array(

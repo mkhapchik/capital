@@ -17,7 +17,7 @@ class SendMailService
 	protected $transport;
 	
 	/**
-	 *  Тип отправки сообщений
+	 *  РўРёРї РѕС‚РїСЂР°РІРєРё СЃРѕРѕР±С‰РµРЅРёР№
 	 *  1 - php mail
 	 *  0 - smtp
 	 */

@@ -1,19 +1,31 @@
 <?php
-namespace Pages\Model;
+namespace Menu\Service;
 
-use Application\Model\AbstractTable;
- 
-class MenuTable extends AbstractTable
-{ 
-    protected $menu;
+use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use Zend\ServiceManager\ServiceLocatorInterface;
+use Zend\EventManager\EventManagerAwareInterface;
+
+class Menu implements ServiceLocatorAwareInterface
+{
+	protected $menu;
 	
-	public function __construct($table)
+	protected $sm;
+	
+	protected $currentUri;
+	
+	public function setServiceLocator(ServiceLocatorInterface $sm)
 	{
-		$this->table = $table;
+		$this->sm = $sm;
 	}
 
-    public function getMenu($name=false)
+    public function getServiceLocator()
 	{
+		return $this->sm;
+	}
+	
+	public function getMenu($name=false)
+	{
+		
 		if(!$this->hasMenu($name))
 		{
 			$data = $this->generateMenu($name);
@@ -21,6 +33,19 @@ class MenuTable extends AbstractTable
 		}
 		
 		return $name===false ? $this->menu : $this->menu[$name];
+	}
+	
+	public function setCurrentUri()
+	{
+		$request = $this->sm->get('request');
+		$url = parse_url($request->getRequestUri());
+		$this->currentUri = $url['path'];
+	}
+	
+	public function getCurrentUri()
+	{
+		if(!isset($this->currentUri)) $this->setCurrentUri();
+		return $this->currentUri;
 	}
 	
 	public function setMenu($data, $name=false)
@@ -37,7 +62,8 @@ class MenuTable extends AbstractTable
 	
 	public function generateMenu($name)
 	{
-		$fetchData = $this->fetchMenu($name);
+		$menuTable = $this->sm->get('Menu\Model\MenuTable');
+		$fetchData = $menuTable->fetchMenu($name);
 		$structuredList = $this->makeStructuredList($fetchData);
 		
 		$config = array();
@@ -52,26 +78,6 @@ class MenuTable extends AbstractTable
 		
 		return $config;
 	}
-	
-	public function fetchMenu($name)
-    {
-        $name_cond = $name ? "AND m.name = '$name'" : '';
-		
-		$query = "SELECT i.*, m.name as menu_name, IFNULL(p.route_name, t.route_name) as route_name, p.route_params
-				  FROM pages_menu_items i 
-				  INNER JOIN pages_menu m ON i.pages_menu_id=m.id 
-				  LEFT JOIN pages p ON i.page_id=p.id 
-				  LEFT JOIN pages_type t ON p.pages_type_id=t.id 
-				  WHERE i.is_active=1 AND m.is_active=1 AND (p.is_active=1 OR p.is_active IS NULL) AND (p.is_delete=0 OR p.is_delete IS NULL)
-				  $name_cond
-				  ORDER BY i.ord asc, i.id asc
-		";
-		
-		$resultSet = $this->query($query);
-        $resultSet = $resultSet->toArray();
-		
-        return $resultSet;
-    }
 	
 	private function makeStructuredList($data)
 	{
@@ -89,9 +95,18 @@ class MenuTable extends AbstractTable
 	{
 		$pages = array();
 		$pages['label'] = $item['label'];
-		if(!empty($item['uri']))
+		
+		if(!empty($item['alias_id']))
+		{
+			$pages['route'] = $this->sm->get('Aliases\Model\AliasesModel')->getRouteNameByAliasId($item['alias_id']);	
+		}
+		else if(!empty($item['uri']))
 		{
 			$pages['uri'] = $item['uri'];
+			
+			$current_uri = $this->getCurrentUri();
+			
+			if(trim($pages['uri'], '/') == trim($current_uri, '/')) $pages['active'] = 1;
 		}
 		else if(empty($item['route_name']))
 		{
@@ -99,7 +114,15 @@ class MenuTable extends AbstractTable
 		}
 		else
 		{
-			$pages['route'] = $item['route_name'];
+			if($item['route_params'])
+			{
+				$pages['route'] = $item['route_name'];
+				$pages['params'] = unserialize($item['route_params']);
+			}
+			else
+			{
+				$pages['route'] = $item['route_name'];
+			}
 		}
 		
 		$pages['pages'] = array();
@@ -114,8 +137,6 @@ class MenuTable extends AbstractTable
 		}
 			
 		return $pages;
-		
-		
 			
 	}
 }

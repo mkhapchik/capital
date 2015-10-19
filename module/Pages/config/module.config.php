@@ -2,28 +2,61 @@
 return array(
 	'controllers' => array(
         'invokables' => array(
-			'Pages\Controller\Index'=>'Pages\Controller\IndexController'
+			'Pages\Controller\Page'=>'Pages\Controller\PageController'
         ),
     ),
 	
 	'router' => array(
         'routes' => array(
-            
 			'pages' => array(
                 'type'    => 'Segment',
                 'options' => array(
-					'route'    => '/pages[/][:action]',
-					'constraints' => array(
-						'action'     => '[a-zA-Z][a-zA-Z0-9_-]*',
+                    'route'    => '/pages[/:id][/]',
+                    'constraints' => array(
+						//'action'     => '[a-zA-Z][a-zA-Z0-9_-]*',
+						'id'     => '[0-9]+',
 					),
 					'defaults' => array(
 						'__NAMESPACE__' => 'Pages\Controller',
-                        'controller'    => 'Index',
-                        'action'        => 'index',
+						'controller'    => 'Page',
+						'action' => 'view'
 					),
-				),
-			),
-			
+                ),
+            ),
+			'pages_admin' => array(
+                'type'    => 'Literal',
+                'options' => array(
+                    'route'    => '/admin/pages',
+					'defaults' => array(),
+                ),
+				'child_routes' => array(
+					'list' => array(
+                        'type'    => 'Segment',
+                        'options' => array(
+                            'route'    => '/list[/]',
+                            'constraints' => array(),
+                            'defaults' => array(
+								'__NAMESPACE__' => 'Pages\Controller',
+								'controller'    => 'Page',
+								'action' => 'list'
+                            ),
+                        ),
+                    ),
+					
+					'add'=>array(
+						'type'    => 'Segment',
+                        'options' => array(
+                            'route'    => '/add[/]',
+                            'constraints' => array(),
+                            'defaults' => array(
+								'__NAMESPACE__' => 'Pages\Controller',
+								'controller'    => 'Page',
+								'action' => 'add'
+                            ),
+                        ),
+					)
+                ),
+            ),
         ),
     ),
 

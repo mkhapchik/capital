@@ -61,7 +61,7 @@ class AuthenticationController extends AbstractActionController
 					if($result->isValid())
 					{
 						$user = $userTable->getUserByLogin($login);
-						
+												
 						if($user->isBlocked())
 						{
 							throw new Exception(AuthorizationController::CODE_ACCESS_IS_USER_BLOCKED);
@@ -91,6 +91,7 @@ class AuthenticationController extends AbstractActionController
 							$sessionData['token'] = $token;
 							$sessionData['user_id'] = $user->id;
 							$sessionData['last_activity'] = date('Y-m-d H:i:s',$lastActivity);
+							$sessionData['starttime'] = date('Y-m-d H:i:s',$lastActivity);
 							
 							$remote = new \Zend\Http\PhpEnvironment\RemoteAddress();
 							$sessionData['ip'] = $remote->getIpAddress();
