@@ -58,8 +58,8 @@ abstract class AbstractTable extends AbstractTableGateway implements AdapterAwar
     public function fetchAll($where=null, $paginated=false, $sort=array(), $filter=null)
 	{
 		$select = new Select($this->table);
-		$select->where($where);
-		$select->where($filter);
+		if(!empty($where)) $select->where($where);
+		if(is_array($filter)) $select->where($filter);
 		$select->order($sort);
 		
 		if($paginated) 

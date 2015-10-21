@@ -72,9 +72,14 @@ class Menu implements ServiceLocatorAwareInterface
 		{
 			foreach($menu[0] as $item)
 			{
-				$config[$name][] = $this->makePages($name, $structuredList, $item);
+				$page = $this->makePages($name, $structuredList, $item);
+				if($page) $config[$name][] = $page;
 			}
 		}
+		
+		$app_config = $this->sm->get('config'); 
+		$navigation_config = is_array($app_config['navigation']) ? $app_config['navigation'] : array();
+		$config = array_merge_recursive($config, $navigation_config);
 		
 		return $config;
 	}
@@ -96,33 +101,36 @@ class Menu implements ServiceLocatorAwareInterface
 		$pages = array();
 		$pages['label'] = $item['label'];
 		
-		if(!empty($item['alias_id']))
+		
+		
+		if(!empty($item['uri']) || empty($item['route_name']))
 		{
-			$pages['route'] = $this->sm->get('Aliases\Model\AliasesModel')->getRouteNameByAliasId($item['alias_id']);	
-		}
-		else if(!empty($item['uri']))
-		{
-			$pages['uri'] = $item['uri'];
-			
+			$pages['uri'] = (string)$item['uri'];
 			$current_uri = $this->getCurrentUri();
-			
 			if(trim($pages['uri'], '/') == trim($current_uri, '/')) $pages['active'] = 1;
-		}
-		else if(empty($item['route_name']))
-		{
-			$pages['uri'] = '';
 		}
 		else
 		{
-			if($item['route_params'])
+			$route = $item['route_name'];
+			$params = !empty($item['route_params']) ? (array)json_decode($item['route_params']) : null;
+			
+			$auth = $this->sm->get('AuthorizationController');
+			$routesModel = $this->sm->get('RoutesTable');
+			$routerId = $routesModel->getRouterIdByRoute($route, $params);
+			
+			if($auth->isAllowed($routerId, 'view'))
 			{
-				$pages['route'] = $item['route_name'];
-				$pages['params'] = unserialize($item['route_params']);
+				if(!empty($params))
+				{
+					$pages['route'] = $route;
+					$pages['params'] = $params;
+				}
+				else
+				{
+					$pages['route'] = $route;
+				}
 			}
-			else
-			{
-				$pages['route'] = $item['route_name'];
-			}
+			else return false;
 		}
 		
 		$pages['pages'] = array();
@@ -132,7 +140,8 @@ class Menu implements ServiceLocatorAwareInterface
 			foreach($structuredList[$name][$item['id']] as $i)
 			{
 				
-				$pages['pages'][]=$this->makePages($name, $structuredList, $i, $deep + 1);
+				$child = $this->makePages($name, $structuredList, $i, $deep + 1);
+				if($child) $pages['pages'][]=$child;
 			}
 		}
 			

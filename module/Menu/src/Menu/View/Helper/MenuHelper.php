@@ -30,7 +30,7 @@ class MenuHelper extends Navigation implements ServiceLocatorAwareInterface
 	{
 		$menuService = $this->sm->get('Menu\Service\Menu');
 		$menu = $menuService->getMenu($menuName);
-				
+
 		if($menuName===false) 
 		{
 			$result = '';
@@ -41,12 +41,12 @@ class MenuHelper extends Navigation implements ServiceLocatorAwareInterface
 			$result = $this->makeMenu($menu, $partial);
 		}
 		
-		
 		return $result;
 	}
 	
 	protected function makeMenu($config, $partial)
 	{
+		
 		$factory    = new ConstructedNavigationFactory($config);
 		$navigation = $factory->createService($this->getServiceLocator());
 		$result = parent::__invoke($navigation)->menu()->setPartial($partial)->render();

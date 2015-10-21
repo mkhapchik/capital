@@ -1,5 +1,15 @@
 <?php
 return array(
+	'navigation'=>array(
+		'admin'=>array(
+			array(
+				'label'=>'Меню',
+				'route'=>'menu_admin/list',
+				'params'=>array()
+			),
+		)
+	),
+	
 	'controllers' => array(
         'invokables' => array(
 			'Menu\Controller\Menu'=>'Menu\Controller\MenuController'
@@ -15,7 +25,7 @@ return array(
 					'defaults' => array(),
                 ),
 				'child_routes' => array(
-					'list_menu' => array(
+					'list' => array(
                         'type'    => 'Segment',
                         'options' => array(
                             'route'    => '/list[/]',

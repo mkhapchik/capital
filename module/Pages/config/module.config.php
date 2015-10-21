@@ -1,5 +1,15 @@
 <?php
 return array(
+	'navigation'=>array(
+		'admin'=>array(
+			array(
+				'label'=>'Страницы',
+				'route'=>'pages_admin/list',
+				'params'=>array()
+			),
+		)
+	),
+	
 	'controllers' => array(
         'invokables' => array(
 			'Pages\Controller\Page'=>'Pages\Controller\PageController'

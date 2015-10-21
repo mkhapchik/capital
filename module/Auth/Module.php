@@ -12,10 +12,13 @@ use Auth\Controller\AuthorizationController;
 use Auth\Controller\AuthenticationController;
 use Zend\View\Model\ViewModel;
 //use Zend\ModuleManager as ModuleManager;
+use Zend\Permissions\Acl\Acl;
+use Zend\Permissions\Acl\Role\GenericRole as Role;
+use Zend\Permissions\Acl\Resource\GenericResource as Resource;
 
 class Module
 {
-	//private $acl;
+	private $acl;
 	private $page;
 	
 	public function getConfig()
@@ -39,55 +42,21 @@ class Module
 	*/
 	public function onBootstrap(MvcEvent $e)
     {		
-		//$this->initAcl($e);
+		$this->initAcl($e);
 		
 		$eventManager        = $e->getApplication()->getEventManager();
 		$moduleRouteListener = new ModuleRouteListener();
         $moduleRouteListener->attach($eventManager);
 
-		//$eventManager->attach(MvcEvent::EVENT_ROUTE, array($this, 'initPage'));
 		$eventManager->attach(MvcEvent::EVENT_ROUTE, array($this, 'checkAccess'));
     }
-	/*
-	public function initPage(MvcEvent $e)
-	{
-		$serviceManager = $e->getApplication()->getServiceManager();
-		
-		$routeMatch = $e->getRouteMatch();
-		
-		$routName = $routeMatch->getMatchedRouteName();
-		$uri = trim($routeMatch->getParam('uri', null), '/');
-		$routeParams = empty($uri) ? null : array('uri'=>$uri);
 	
-		
-		
-		$pageModel = $serviceManager->get('Pages\Model\PageModel');
-		$pageData = $pageModel->getPageByRoute($routName, $routeParams);
-		
-		if(count($pageData))
-		{
-			$page = $this->getPage($serviceManager, $pageData[0]['type_name']);
-			$page->exchangeArray($pageData[0]);
-			$this->page = $page;
-		}
-	}
-	*/
-	
-	private function getPage($sm, $type_name=null)
-	{
-		$page = false;
-		switch($type_name)
-		{
-			default: $page = $sm->get('Page');
-		}
-		
-		return $page;
-	}
-	
+
 	public function checkAccess(MvcEvent $e)
 	{
 		$serviceManager = $e->getApplication()->getServiceManager();
 		$routeMatch = $e->getRouteMatch();
+
 		$routName = $routeMatch->getMatchedRouteName();
 
 		$authorizationController = $serviceManager->get('AuthorizationController');
@@ -99,62 +68,78 @@ class Module
 		
 		if(!in_array($routName, $ignore_routes))
 		{
-			$pageId = false;
-			/*
-			try
-			{
-				$hfu = $serviceManager->get('hfuModel');
-				
-				$pageId = $hfu->getPageIdByUri($uri);
-				
-				
-			}
-			catch(\Exception $e)
-			{
-				$params = $routeMatch->getParams();
-				var_dump($params);
-				
-				$pageModel = $this->serviceLocator->get('Pages\Model\PageModel');
-				$page = $pageModel->getPageByRoute();
-				$pageId = $page->id;
-				
-				//echo $e->getMessage();
-			}
-			*/
-			// получить страницу по маршруту и параметрам
-			$pageId = true;
+			//$resource = $this->getResource($e);
+			//$action = $routeMatch->getParam('action');
 			
-			if(!$pageId)
+			$codeAccess = $authorizationController->checkAccess($routeMatch);
+			$authorizationController = $serviceManager->get('AuthorizationController');
+		
+			if($codeAccess != AuthorizationController::CODE_ACCESS_IS_ALLOWED)
 			{
-				$routeMatch->setParam('__NAMESPACE__', 'Zend\Mvc\Controller');
-				$routeMatch->setParam('__CONTROLLER__', 'AbstractActionController');
-				$routeMatch->setParam('controller', 'Zend\Mvc\Controller\AbstractActionController');
-				$routeMatch->setParam('action', 'notFoundAction');
-			}
-			else
-			{
-			
-				$codeAccess = $authorizationController->checkAccess();
-				$authorizationController = $serviceManager->get('AuthorizationController');
-			
-				if($codeAccess != AuthorizationController::CODE_ACCESS_IS_ALLOWED)
-				{
-					$routeMatch->setParam('__NAMESPACE__', 'Auth\Controller');
-					$routeMatch->setParam('__CONTROLLER__', 'Authentication');
-					$routeMatch->setParam('controller', 'Auth\Controller\Authentication');
-					$routeMatch->setParam('action', 'login');
-					$routeMatch->setParam('codeAccess', $codeAccess);
-					$routeMatch->setParam('is_success', 0);
-					$routeMatch->setParam('is_ajax', 0);
-					
-				}
+				$routeMatch->setParam('__NAMESPACE__', 'Auth\Controller');
+				$routeMatch->setParam('__CONTROLLER__', 'Authentication');
+				$routeMatch->setParam('controller', 'Auth\Controller\Authentication');
+				$routeMatch->setParam('action', 'login');
+				$routeMatch->setParam('codeAccess', $codeAccess);
+				$routeMatch->setParam('is_success', 0);
+				$routeMatch->setParam('is_ajax', 0);
 			}
 		}
 	}
+	/*
+	private function getResource(MvcEvent $e)
+	{
+		$serviceManager = $e->getApplication()->getServiceManager();
+		$routeMatch = $e->getRouteMatch();
+		
+		$pageId = false;
+		try
+		{
+			$routName = $routeMatch->getMatchedRouteName();
+			$params = $routeMatch->getParams();
+			
+			$sys_params = array('__NAMESPACE__', 'controller', '__CONTROLLER__', 'action');
+			$params = array_filter($params, function($k) use($sys_params){
+				return !in_array($k, $sys_params);
+			}, ARRAY_FILTER_USE_KEY);
+					
+			$pageModel = $serviceManager->get('Pages\Model\PageModel');
+			
+			$pageId = $pageModel->getPageIdByRoute($routName, $params);
+		}
+		catch(\Exception $e)
+		{
+			
+		}
+		return $pageId;
+	}
+	*/
 	
 	public function initAcl(MvcEvent $e)
 	{
+		/*
+		$serviceManager = $e->getApplication()->getServiceManager();
+		$permissionsTable = $serviceManager->get('PermissionsTable');
 		
+		$permissionsTable->fetchAll();
+		
+		$acl = new Acl();
+		$roleGuest = new Role('guest');
+		$acl->addRole($roleGuest);
+		
+		$acl->addRole(new Role('admin'), $roleGuest);
+		
+		$acl->addResource(new Resource('Q'));
+		
+		//$acl->deny('guest', 'Q');
+		//$acl->allow('admin', 'Q');
+		//$acl->deny('guest', 'Q');
+		$acl->allow('admin', 'Q', 'P1');
+		$acl->deny('admin', 'Q', 'P1');
+		
+		//var_dump($acl->hasRole($roleGuest));
+		//var_dump($acl->isAllowed('aaa', 'Q', 'P1'));
+		*/
 	}
 	
 	public function getServiceConfig()
@@ -175,6 +160,15 @@ class Module
 				},
 				'IpAllowedListTable' => function($sm){
 					return new IpAllowedListTable('ip_allowed_list');
+				},
+				'PermissionsTable' => function($sm){
+					return new \Auth\Model\PermissionsTable('permissions');
+				},
+				'RoleTable' => function($sm){
+					return new \Auth\Model\RoleTable('users_roles');
+				},
+				'RoutesTable' => function($sm){
+					return new \Auth\Model\RoutesTable('routes');
 				},
 				'AuthorizationController'=>function($sm){
 					return new AuthorizationController();

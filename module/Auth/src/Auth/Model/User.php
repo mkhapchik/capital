@@ -9,6 +9,7 @@ class User
 	public $counter_failures;
 	public $blocked;
 	public $name;
+	public $roles;
 	 
     public function exchangeArray($data)
     {
@@ -19,6 +20,16 @@ class User
 		$this->blocked     = (isset($data['blocked'])) ? $data['blocked'] : null;
 		$this->name     = (isset($data['name'])) ? $data['name'] : null;
     }
+	
+	public function setRoles($roles)
+	{
+		$this->roles = $roles;
+	}
+	
+	public function getRoles()
+	{
+		return $this->roles;
+	}
 	
 	public function isBlocked()
 	{

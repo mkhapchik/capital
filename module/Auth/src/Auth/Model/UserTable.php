@@ -49,5 +49,17 @@ class UserTable extends AbstractTable
         
         return $row;
 	}
+	
+	public function getUserRoles($userId)
+	{
+		$query = "SELECT r.* FROM users_roles r 
+		LEFT JOIN users_roles_map m ON m.role_id=r.id 
+		WHERE m.user_id=$userId OR r.is_guest=1 
+		ORDER BY r.is_guest DESC";
+		
+		$res = $this->query($query);
+		
+		return $res->toArray();
+	}
 
 }
